@@ -27,17 +27,23 @@ function extractRings(geometry: Geometry): Position[][] {
   }
 }
 
-/** Convert latitude to Mercator y coordinate */
+const DEG2RAD = Math.PI / 180;
+
+/** Project longitude to Mercator x (radians) */
+function mercatorX(lng: number): number {
+  return lng * DEG2RAD;
+}
+
+/** Project latitude to Mercator y (radians, north = negative for SVG) */
 function mercatorY(lat: number): number {
-  // Clamp to avoid infinity at the poles
   const clamped = Math.max(-85, Math.min(85, lat));
-  const radLat = (clamped * Math.PI) / 180;
+  const radLat = clamped * DEG2RAD;
   return -Math.log(Math.tan(Math.PI / 4 + radLat / 2));
 }
 
 /**
- * Mercator projection — lng maps to x, lat maps to y via Mercator formula.
- * Produces familiar "map-like" country outlines.
+ * Mercator projection — both axes in the same radian coordinate space
+ * so country aspect ratios are preserved correctly.
  */
 function projectAndScale(
   rings: Position[][],
@@ -47,13 +53,14 @@ function projectAndScale(
 ): { paths: string[]; viewBox: string } {
   if (rings.length === 0) return { paths: [], viewBox: `0 0 ${width} ${height}` };
 
-  // Find bounds in projected space
+  // Find bounds in projected (radian) space
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
   for (const ring of rings) {
     for (const [lng, lat] of ring) {
+      const mx = mercatorX(lng);
       const my = mercatorY(lat);
-      if (lng < minX) minX = lng;
-      if (lng > maxX) maxX = lng;
+      if (mx < minX) minX = mx;
+      if (mx > maxX) maxX = mx;
       if (my < minY) minY = my;
       if (my > maxY) maxY = my;
     }
@@ -70,7 +77,7 @@ function projectAndScale(
 
   const paths = rings.map((ring) => {
     const points = ring.map(([lng, lat]) => {
-      const x = (lng - minX) * scale + offsetX;
+      const x = (mercatorX(lng) - minX) * scale + offsetX;
       const y = (mercatorY(lat) - minY) * scale + offsetY;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     });

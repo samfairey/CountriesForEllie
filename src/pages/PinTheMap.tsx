@@ -285,8 +285,8 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
               )}
             </div>
 
-            {/* Map */}
-            <div className="flex-1 relative min-h-0">
+            {/* Map — constrain height in reverse mode to leave room for 6 MC options */}
+            <div className={`relative min-h-0 ${reversed ? "h-[35vh]" : "flex-1"}`}>
               <WorldMap
                 interactive={!reversed}
                 highlightedCountries={[

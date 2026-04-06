@@ -27,9 +27,17 @@ function extractRings(geometry: Geometry): Position[][] {
   }
 }
 
+/** Convert latitude to Mercator y coordinate */
+function mercatorY(lat: number): number {
+  // Clamp to avoid infinity at the poles
+  const clamped = Math.max(-85, Math.min(85, lat));
+  const radLat = (clamped * Math.PI) / 180;
+  return -Math.log(Math.tan(Math.PI / 4 + radLat / 2));
+}
+
 /**
- * Simple equirectangular projection — lng maps to x, lat maps to y (inverted).
- * Good enough for recognisable country outlines.
+ * Mercator projection — lng maps to x, lat maps to y via Mercator formula.
+ * Produces familiar "map-like" country outlines.
  */
 function projectAndScale(
   rings: Position[][],
@@ -39,14 +47,15 @@ function projectAndScale(
 ): { paths: string[]; viewBox: string } {
   if (rings.length === 0) return { paths: [], viewBox: `0 0 ${width} ${height}` };
 
-  // Find bounds
+  // Find bounds in projected space
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
   for (const ring of rings) {
     for (const [lng, lat] of ring) {
+      const my = mercatorY(lat);
       if (lng < minX) minX = lng;
       if (lng > maxX) maxX = lng;
-      if (-lat < minY) minY = -lat;
-      if (-lat > maxY) maxY = -lat;
+      if (my < minY) minY = my;
+      if (my > maxY) maxY = my;
     }
   }
 
@@ -62,7 +71,7 @@ function projectAndScale(
   const paths = rings.map((ring) => {
     const points = ring.map(([lng, lat]) => {
       const x = (lng - minX) * scale + offsetX;
-      const y = (-lat - minY) * scale + offsetY;
+      const y = (mercatorY(lat) - minY) * scale + offsetY;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
     return `M${points.join("L")}Z`;

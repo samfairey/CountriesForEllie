@@ -71,7 +71,6 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState<Region | "All">("All");
-  const [pool, setPool] = useState<Country[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const autoStarted = useRef(false);
 
@@ -113,7 +112,6 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
       const regionPool =
         selectedRegion === "All" ? countries : countries.filter((c) => c.region === selectedRegion);
-      setPool(regionPool);
       const count = Math.min(QUESTIONS_PER_ROUND, regionPool.length);
       // Always medium: 6 options for reverse MC
       const optionCount = 6;

@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -8,13 +8,19 @@ import { useProgress } from "../hooks/useProgress";
 import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
-import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
+import { QuizSetup, type Difficulty, type DifficultyOption } from "../components/quiz/QuizSetup";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
 const QUESTIONS_PER_ROUND = 20;
+
+const CAPITAL_DIFFICULTIES: DifficultyOption[] = [
+  { value: "easy", label: "Easy", desc: "4 options + flag" },
+  { value: "medium", label: "Medium", desc: "6 options" },
+  { value: "hard", label: "Hard", desc: "Type it" },
+];
 
 /** Standard: show country name → pick capital */
 function generateCapitalQuestions(
@@ -23,22 +29,14 @@ function generateCapitalQuestions(
   optionCount: number
 ): QuizQuestion<Country>[] {
   const questionCountries = shuffle(pool).slice(0, count);
-  const usedAsWrong = new Set<string>();
 
   return questionCountries.map((country) => {
     if (optionCount === 0) {
       return { subject: country, correctAnswer: country.capital, options: [] };
     }
 
-    const sameRegion = pool.filter(
-      (c) => c.id !== country.id && c.region === country.region && !usedAsWrong.has(c.id)
-    );
-    const otherRegion = pool.filter(
-      (c) => c.id !== country.id && c.region !== country.region && !usedAsWrong.has(c.id)
-    );
-    const wrongPool = shuffle([...sameRegion, ...otherRegion]);
-    const wrongOptions = wrongPool.slice(0, optionCount - 1);
-    wrongOptions.forEach((c) => usedAsWrong.add(c.id));
+    const others = pool.filter((c) => c.id !== country.id);
+    const wrongOptions = shuffle(others).slice(0, optionCount - 1);
 
     return {
       subject: country,
@@ -55,22 +53,14 @@ function generateReverseCapitalQuestions(
   optionCount: number
 ): QuizQuestion<Country>[] {
   const questionCountries = shuffle(pool).slice(0, count);
-  const usedAsWrong = new Set<string>();
 
   return questionCountries.map((country) => {
     if (optionCount === 0) {
       return { subject: country, correctAnswer: country.name, options: [] };
     }
 
-    const sameRegion = pool.filter(
-      (c) => c.id !== country.id && c.region === country.region && !usedAsWrong.has(c.id)
-    );
-    const otherRegion = pool.filter(
-      (c) => c.id !== country.id && c.region !== country.region && !usedAsWrong.has(c.id)
-    );
-    const wrongPool = shuffle([...sameRegion, ...otherRegion]);
-    const wrongOptions = wrongPool.slice(0, optionCount - 1);
-    wrongOptions.forEach((c) => usedAsWrong.add(c.id));
+    const others = pool.filter((c) => c.id !== country.id);
+    const wrongOptions = shuffle(others).slice(0, optionCount - 1);
 
     return {
       subject: country,
@@ -117,6 +107,8 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
   );
 
   const quiz = useQuiz<Country>(config);
+  const quizRef = useRef(quiz);
+  quizRef.current = quiz;
 
   const handleStart = useCallback(
     (region: Region | "All", diff: Difficulty, rev: boolean) => {
@@ -127,7 +119,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
       const count = Math.min(QUESTIONS_PER_ROUND, pool.length);
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 
-      // Preload flag images (used as hints)
+      // Preload flag images (used as hints on easy)
       setPreloading(true);
       const preloadPool = shuffle(pool).slice(0, count);
       const preloadPromises = preloadPool.map(
@@ -142,13 +134,15 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
 
       Promise.all(preloadPromises).then(() => {
         setPreloading(false);
-        quiz.startQuiz(pool, count, optionCount);
+        quizRef.current.startQuiz(pool, count, optionCount);
       });
     },
-    [quiz]
+    []
   );
 
   const renderPrompt = (q: QuizQuestion<Country>) => {
+    const showFlag = difficulty === "easy";
+
     if (reversed) {
       // Show capital → pick country
       return (
@@ -159,12 +153,14 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
           <p className="text-slate-400 mt-2 text-sm">
             Which country has this capital?
           </p>
-          <img
-            src={q.subject.flagSvgUrl}
-            alt={`Hint flag`}
-            className="mt-4 h-12 w-auto object-contain rounded shadow-md border border-navy-lighter mx-auto"
-            draggable={false}
-          />
+          {showFlag && (
+            <img
+              src={q.subject.flagSvgUrl}
+              alt="Hint flag"
+              className="mt-4 h-12 w-auto object-contain rounded shadow-md border border-navy-lighter mx-auto"
+              draggable={false}
+            />
+          )}
         </div>
       );
     }
@@ -177,12 +173,14 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
         <p className="text-slate-400 mt-2 text-sm">
           What is the capital of this country?
         </p>
-        <img
-          src={q.subject.flagSvgUrl}
-          alt={`Flag of ${q.subject.name}`}
-          className="mt-4 h-12 w-auto object-contain rounded shadow-md border border-navy-lighter mx-auto"
-          draggable={false}
-        />
+        {showFlag && (
+          <img
+            src={q.subject.flagSvgUrl}
+            alt={`Flag of ${q.subject.name}`}
+            className="mt-4 h-12 w-auto object-contain rounded shadow-md border border-navy-lighter mx-auto"
+            draggable={false}
+          />
+        )}
       </div>
     );
   };
@@ -204,6 +202,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
                 onStart={handleStart}
                 showReverse
                 reverseLabel={["Country → Capital", "Capital → Country"]}
+                difficulties={CAPITAL_DIFFICULTIES}
               />
             )}
           </div>

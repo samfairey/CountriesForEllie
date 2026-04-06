@@ -5,7 +5,9 @@ import type { Region } from "../../types/country";
 export type Difficulty = "easy" | "medium" | "hard";
 
 const REGIONS: (Region | "All")[] = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"];
-const DIFFICULTIES: { value: Difficulty; label: string; desc: string }[] = [
+export type DifficultyOption = { value: Difficulty; label: string; desc: string };
+
+const DEFAULT_DIFFICULTIES: DifficultyOption[] = [
   { value: "easy", label: "Easy", desc: "4 choices" },
   { value: "medium", label: "Medium", desc: "6 choices" },
   { value: "hard", label: "Hard", desc: "Type it" },
@@ -17,6 +19,10 @@ interface QuizSetupProps {
   onStart: (region: Region | "All", difficulty: Difficulty, reversed: boolean) => void;
   showReverse?: boolean;
   reverseLabel?: [string, string]; // [standard label, reverse label]
+  /** Hide hard mode when reversed (e.g. Flag Quiz reverse can't be typed) */
+  disableHardWhenReversed?: boolean;
+  /** Custom difficulty options (overrides defaults) */
+  difficulties?: DifficultyOption[];
 }
 
 export function QuizSetup({
@@ -25,10 +31,14 @@ export function QuizSetup({
   onStart,
   showReverse = false,
   reverseLabel = ["Standard", "Reverse"],
+  disableHardWhenReversed = false,
+  difficulties = DEFAULT_DIFFICULTIES,
 }: QuizSetupProps) {
   const [region, setRegion] = useState<Region | "All">("All");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
+
+  const hardDisabled = disableHardWhenReversed && reversed;
 
   return (
     <motion.div
@@ -68,20 +78,26 @@ export function QuizSetup({
           Difficulty
         </label>
         <div className="grid grid-cols-3 gap-3">
-          {DIFFICULTIES.map((d) => (
-            <button
-              key={d.value}
-              onClick={() => setDifficulty(d.value)}
-              className={`p-3 rounded-xl text-center transition-all border ${
-                difficulty === d.value
-                  ? "bg-sky/10 border-sky text-white"
-                  : "bg-navy-light border-navy-lighter text-slate-300 hover:border-slate-500"
-              }`}
-            >
-              <div className="font-semibold">{d.label}</div>
-              <div className="text-xs text-slate-400 mt-0.5">{d.desc}</div>
-            </button>
-          ))}
+          {difficulties.map((d) => {
+            const disabled = d.value === "hard" && hardDisabled;
+            return (
+              <button
+                key={d.value}
+                onClick={() => !disabled && setDifficulty(d.value)}
+                disabled={disabled}
+                className={`p-3 rounded-xl text-center transition-all border ${
+                  disabled
+                    ? "bg-navy-light/50 border-navy-lighter/50 text-slate-600 cursor-not-allowed"
+                    : difficulty === d.value
+                      ? "bg-sky/10 border-sky text-white"
+                      : "bg-navy-light border-navy-lighter text-slate-300 hover:border-slate-500"
+                }`}
+              >
+                <div className="font-semibold">{d.label}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{d.desc}</div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -97,7 +113,13 @@ export function QuizSetup({
               return (
                 <button
                   key={label}
-                  onClick={() => setReversed(i === 1)}
+                  onClick={() => {
+                    const newReversed = i === 1;
+                    setReversed(newReversed);
+                    if (newReversed && disableHardWhenReversed && difficulty === "hard") {
+                      setDifficulty("medium");
+                    }
+                  }}
                   className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${
                     isActive
                       ? "bg-sky text-white shadow-md"

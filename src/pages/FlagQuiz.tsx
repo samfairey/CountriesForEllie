@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -22,22 +22,14 @@ function generateFlagQuestions(
   optionCount: number
 ): QuizQuestion<Country>[] {
   const questionCountries = shuffle(pool).slice(0, count);
-  const usedAsWrong = new Set<string>();
 
   return questionCountries.map((country) => {
     if (optionCount === 0) {
       return { subject: country, correctAnswer: country.name, options: [] };
     }
 
-    const sameRegion = pool.filter(
-      (c) => c.id !== country.id && c.region === country.region && !usedAsWrong.has(c.id)
-    );
-    const otherRegion = pool.filter(
-      (c) => c.id !== country.id && c.region !== country.region && !usedAsWrong.has(c.id)
-    );
-    const wrongPool = shuffle([...sameRegion, ...otherRegion]);
-    const wrongOptions = wrongPool.slice(0, optionCount - 1);
-    wrongOptions.forEach((c) => usedAsWrong.add(c.id));
+    const others = pool.filter((c) => c.id !== country.id);
+    const wrongOptions = shuffle(others).slice(0, optionCount - 1);
 
     return {
       subject: country,
@@ -53,22 +45,14 @@ function generateReverseFlagQuestions(
   optionCount: number
 ): QuizQuestion<Country>[] {
   const questionCountries = shuffle(pool).slice(0, count);
-  const usedAsWrong = new Set<string>();
 
   return questionCountries.map((country) => {
     if (optionCount === 0) {
       return { subject: country, correctAnswer: country.name, options: [] };
     }
 
-    const sameRegion = pool.filter(
-      (c) => c.id !== country.id && c.region === country.region && !usedAsWrong.has(c.id)
-    );
-    const otherRegion = pool.filter(
-      (c) => c.id !== country.id && c.region !== country.region && !usedAsWrong.has(c.id)
-    );
-    const wrongPool = shuffle([...sameRegion, ...otherRegion]);
-    const wrongOptions = wrongPool.slice(0, optionCount - 1);
-    wrongOptions.forEach((c) => usedAsWrong.add(c.id));
+    const others = pool.filter((c) => c.id !== country.id);
+    const wrongOptions = shuffle(others).slice(0, optionCount - 1);
 
     return {
       subject: country,
@@ -107,6 +91,8 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
   );
 
   const quiz = useQuiz<Country>(config);
+  const quizRef = useRef(quiz);
+  quizRef.current = quiz;
 
   // Track challenge flags when quiz completes
   const handleComplete = quiz.phase === "results";
@@ -148,10 +134,10 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
 
       Promise.all(preloadPromises).then(() => {
         setPreloading(false);
-        quiz.startQuiz(pool, count, optionCount);
+        quizRef.current.startQuiz(pool, count, optionCount);
       });
     },
-    [quiz]
+    []
   );
 
   const renderPrompt = (q: QuizQuestion<Country>) => {
@@ -207,6 +193,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
                 onStart={handleStart}
                 showReverse
                 reverseLabel={["Flag → Country", "Country → Flag"]}
+                disableHardWhenReversed
               />
             )}
           </div>
@@ -216,11 +203,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
           <QuizQuestionView
             key={`q-${quiz.currentIndex}`}
             prompt={renderPrompt(quiz.currentQuestion)}
-            correctAnswer={
-              reversed
-                ? quiz.currentQuestion.subject.name
-                : quiz.currentQuestion.correctAnswer
-            }
+            correctAnswer={quiz.currentQuestion.correctAnswer}
             options={quiz.currentQuestion.options}
             currentIndex={quiz.currentIndex}
             totalQuestions={quiz.totalQuestions}

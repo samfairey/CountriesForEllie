@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -10,7 +10,7 @@ import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
 import { loadGeoJson, getCountryFeature, preloadGeoJson } from "../utils/geoData";
-import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
+import { QuizSetup, type Difficulty, type DifficultyOption } from "../components/quiz/QuizSetup";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
 import { ProgressBar } from "../components/common/ProgressBar";
@@ -20,6 +20,12 @@ import type { Achievement } from "../data/achievements";
 const countries = countriesData as Country[];
 const QUESTIONS_PER_ROUND = 20;
 
+const SHAPE_DIFFICULTIES: DifficultyOption[] = [
+  { value: "easy", label: "Easy", desc: "4 options + flag" },
+  { value: "medium", label: "Medium", desc: "6 options" },
+  { value: "hard", label: "Hard", desc: "Type it" },
+];
+
 /** Standard: show shape → name the country */
 function generateShapeQuestions(
   pool: Country[],
@@ -27,22 +33,14 @@ function generateShapeQuestions(
   optionCount: number
 ): QuizQuestion<Country>[] {
   const questionCountries = shuffle(pool).slice(0, count);
-  const usedAsWrong = new Set<string>();
 
   return questionCountries.map((country) => {
     if (optionCount === 0) {
       return { subject: country, correctAnswer: country.name, options: [] };
     }
 
-    const sameRegion = pool.filter(
-      (c) => c.id !== country.id && c.region === country.region && !usedAsWrong.has(c.id)
-    );
-    const otherRegion = pool.filter(
-      (c) => c.id !== country.id && c.region !== country.region && !usedAsWrong.has(c.id)
-    );
-    const wrongPool = shuffle([...sameRegion, ...otherRegion]);
-    const wrongOptions = wrongPool.slice(0, optionCount - 1);
-    wrongOptions.forEach((c) => usedAsWrong.add(c.id));
+    const others = pool.filter((c) => c.id !== country.id);
+    const wrongOptions = shuffle(others).slice(0, optionCount - 1);
 
     return {
       subject: country,
@@ -59,18 +57,10 @@ function generateReverseShapeQuestions(
   _optionCount: number
 ): QuizQuestion<Country>[] {
   const questionCountries = shuffle(pool).slice(0, count);
-  const usedAsWrong = new Set<string>();
 
   return questionCountries.map((country) => {
-    const sameRegion = pool.filter(
-      (c) => c.id !== country.id && c.region === country.region && !usedAsWrong.has(c.id)
-    );
-    const otherRegion = pool.filter(
-      (c) => c.id !== country.id && c.region !== country.region && !usedAsWrong.has(c.id)
-    );
-    const wrongPool = shuffle([...sameRegion, ...otherRegion]);
-    const wrongOptions = wrongPool.slice(0, 3); // always 4 shape options
-    wrongOptions.forEach((c) => usedAsWrong.add(c.id));
+    const others = pool.filter((c) => c.id !== country.id);
+    const wrongOptions = shuffle(others).slice(0, 3); // always 4 shape options
 
     return {
       subject: country,
@@ -89,6 +79,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
+  const geoDataRef = useRef<FeatureCollection | null>(null);
 
   useEffect(() => {
     preloadGeoJson();
@@ -114,6 +105,8 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
   );
 
   const quiz = useQuiz<Country>(config);
+  const quizRef = useRef(quiz);
+  quizRef.current = quiz;
 
   const handleStart = useCallback(
     async (region: Region | "All", diff: Difficulty, rev: boolean) => {
@@ -122,6 +115,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
       setLoading(true);
 
       const geo = await loadGeoJson();
+      geoDataRef.current = geo;
       setGeoData(geo);
 
       const pool =
@@ -130,19 +124,17 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 
       setLoading(false);
-      quiz.startQuiz(pool, count, optionCount);
+      quizRef.current.startQuiz(pool, count, optionCount);
     },
-    [quiz]
+    []
   );
 
-  const getGeometry = useCallback(
-    (countryId: string): Geometry | null => {
-      if (!geoData) return null;
-      const feature = getCountryFeature(geoData, countryId);
-      return feature?.geometry ?? null;
-    },
-    [geoData]
-  );
+  const getGeometry = (countryId: string): Geometry | null => {
+    const data = geoData ?? geoDataRef.current;
+    if (!data) return null;
+    const feature = getCountryFeature(data, countryId);
+    return feature?.geometry ?? null;
+  };
 
   const q = quiz.currentQuestion;
   const isHardMode = !reversed && difficulty === "hard";
@@ -190,6 +182,14 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
         <p className="text-slate-400 mt-2 text-sm">
           Which outline belongs to this country?
         </p>
+        {difficulty === "easy" && (
+          <img
+            src={q.subject.flagSvgUrl}
+            alt="Flag hint"
+            className="mt-4 h-10 w-auto object-contain rounded shadow border border-navy-lighter mx-auto"
+            draggable={false}
+          />
+        )}
       </div>
     );
   };
@@ -266,6 +266,8 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 onStart={handleStart}
                 showReverse
                 reverseLabel={["Shape → Name", "Name → Shape"]}
+                difficulties={SHAPE_DIFFICULTIES}
+                disableHardWhenReversed
               />
             )}
           </div>

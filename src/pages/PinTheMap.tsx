@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -39,18 +39,10 @@ function generateReversePinQuestions(
   optionCount: number
 ): QuizQuestion<Country>[] {
   const questionCountries = shuffle(pool).slice(0, count);
-  const usedAsWrong = new Set<string>();
 
   return questionCountries.map((country) => {
-    const sameRegion = pool.filter(
-      (c) => c.id !== country.id && c.region === country.region && !usedAsWrong.has(c.id)
-    );
-    const otherRegion = pool.filter(
-      (c) => c.id !== country.id && c.region !== country.region && !usedAsWrong.has(c.id)
-    );
-    const wrongPool = shuffle([...sameRegion, ...otherRegion]);
-    const wrongOptions = wrongPool.slice(0, Math.max(optionCount - 1, 3));
-    wrongOptions.forEach((c) => usedAsWrong.add(c.id));
+    const others = pool.filter((c) => c.id !== country.id);
+    const wrongOptions = shuffle(others).slice(0, Math.max(optionCount - 1, 3));
 
     return {
       subject: country,
@@ -92,6 +84,8 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   );
 
   const quiz = useQuiz<Country>(config);
+  const quizRef = useRef(quiz);
+  quizRef.current = quiz;
 
   const handleStart = useCallback(
     (region: Region | "All", diff: Difficulty, rev: boolean) => {
@@ -122,10 +116,10 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         setCorrectId(null);
         setWrongId(null);
         setZoomTarget(null);
-        quiz.startQuiz(pool, count, optionCount);
+        quizRef.current.startQuiz(pool, count, optionCount);
       });
     },
-    [quiz]
+    []
   );
 
   const handleMapClick = useCallback(
@@ -145,7 +139,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
       quiz.submitAnswer(countryId);
 
       // Reset map highlights after the quiz auto-advances
-      const delay = correct ? 800 : 1500;
+      const delay = correct ? 200 : 600;
       setTimeout(() => {
         setCorrectId(null);
         setWrongId(null);
@@ -162,7 +156,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
       // Reset zoom after advance
       const correct = answer === quiz.currentQuestion.correctAnswer;
-      const delay = correct ? 800 : 1500;
+      const delay = correct ? 200 : 600;
       setTimeout(() => {
         setZoomTarget(null);
       }, delay);

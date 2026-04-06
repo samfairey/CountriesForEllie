@@ -124,7 +124,7 @@ export function Home() {
         {blitzHigh > 0 && (
           <StatPill label="Blitz" value={blitzHigh.toLocaleString()} icon="⚡" />
         )}
-        <Link to="/achievements" className="no-underline">
+        <Link to="/achievements" className="no-underline flex items-center shrink-0">
           <StatPill label="Achievements" value={`${unlockedIds.size}/${totalAchievements}`} icon="🏆" />
         </Link>
         <StatPill label="Quizzes" value={`${progress.totalQuizzesCompleted}`} icon="✅" />

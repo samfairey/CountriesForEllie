@@ -234,6 +234,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
               <ProgressBar
                 current={quiz.currentIndex + 1}
                 total={quiz.totalQuestions}
+                onQuit={quiz.reset}
               />
               {!reversed && (
                 <div className="flex items-center gap-3 mt-3">

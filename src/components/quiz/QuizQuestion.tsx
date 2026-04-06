@@ -19,6 +19,8 @@ interface QuizQuestionProps {
   inputPlaceholder?: string;
   /** Custom renderer for option button content. Receives the option value. */
   renderOptionLabel?: (option: string) => ReactNode;
+  /** Called when user wants to quit the quiz early */
+  onQuit?: () => void;
 }
 
 export function QuizQuestionView({
@@ -33,6 +35,7 @@ export function QuizQuestionView({
   isHardMode,
   inputPlaceholder = "Type your answer...",
   renderOptionLabel,
+  onQuit,
 }: QuizQuestionProps) {
   const [typedAnswer, setTypedAnswer] = useState("");
   const answered = lastAnswerCorrect !== null;
@@ -80,7 +83,7 @@ export function QuizQuestionView({
       transition={{ duration: 0.25 }}
       className="max-w-2xl mx-auto"
     >
-      <ProgressBar current={currentIndex + 1} total={totalQuestions} />
+      <ProgressBar current={currentIndex + 1} total={totalQuestions} onQuit={onQuit} />
 
       {/* Prompt area */}
       <div

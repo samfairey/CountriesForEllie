@@ -287,6 +287,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 <ProgressBar
                   current={quiz.currentIndex + 1}
                   total={quiz.totalQuestions}
+                  onQuit={quiz.reset}
                 />
                 <div className="mt-6 rounded-2xl bg-navy-light border border-navy-lighter p-6 flex flex-col items-center">
                   {renderReversePrompt()}
@@ -326,6 +327,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 selectedAnswer={quiz.selectedAnswer}
                 isHardMode={isHardMode}
                 inputPlaceholder="Type the country name..."
+                onQuit={quiz.reset}
               />
             )}
           </div>

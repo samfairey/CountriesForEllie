@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useCallback } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 import { Shell } from "./components/layout/Shell";
 import { Home } from "./pages/Home";
 import { FlagQuiz } from "./pages/FlagQuiz";
@@ -28,6 +28,24 @@ function LoadingFallback() {
     <div className="flex flex-col items-center justify-center py-20">
       <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
       <p className="text-slate-400">Loading...</p>
+    </div>
+  );
+}
+
+function NotFound() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="text-6xl mb-4">🌍</div>
+      <h1 className="text-3xl font-bold text-white mb-2">Page not found</h1>
+      <p className="text-slate-400 mb-6">
+        Looks like you've wandered off the map!
+      </p>
+      <Link
+        to="/"
+        className="px-6 py-3 bg-sky hover:bg-sky-dark text-white font-semibold rounded-xl transition-colors no-underline"
+      >
+        Back to Home
+      </Link>
     </div>
   );
 }
@@ -85,6 +103,7 @@ export default function App() {
               </Suspense>
             }
           />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

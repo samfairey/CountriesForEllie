@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { Region } from "../../types/country";
+import { getSettings } from "../../hooks/useSettings";
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -34,8 +35,15 @@ export function QuizSetup({
   disableHardWhenReversed = false,
   difficulties = DEFAULT_DIFFICULTIES,
 }: QuizSetupProps) {
-  const [region, setRegion] = useState<Region | "All">("All");
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const saved = getSettings();
+  // Clamp saved difficulty to available options
+  const availableDiffs = difficulties.map((d) => d.value);
+  const initialDiff = availableDiffs.includes(saved.defaultDifficulty)
+    ? saved.defaultDifficulty
+    : availableDiffs[0];
+
+  const [region, setRegion] = useState<Region | "All">(saved.defaultRegion);
+  const [difficulty, setDifficulty] = useState<Difficulty>(initialDiff);
   const [reversed, setReversed] = useState(false);
 
   const hardDisabled = disableHardWhenReversed && reversed;

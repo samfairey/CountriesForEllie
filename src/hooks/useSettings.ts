@@ -55,6 +55,11 @@ export function useSettings() {
   return { settings, update, resetProgress };
 }
 
+/** Static read of saved settings (no hook needed) */
+export function getSettings(): AppSettings {
+  return loadSettings();
+}
+
 /** Static check without hook (for routing) */
 export function hasOnboarded(): boolean {
   try {

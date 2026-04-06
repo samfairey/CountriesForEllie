@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState, useRef } from "react";
+import { useMemo, useCallback, useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -96,9 +96,8 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
   quizRef.current = quiz;
 
   // Track challenge flags when quiz completes
-  const handleComplete = quiz.phase === "results";
-  useMemo(() => {
-    if (handleComplete && quiz.totalQuestions >= 20) {
+  useEffect(() => {
+    if (quiz.phase === "results" && quiz.totalQuestions >= 20) {
       if (quiz.score === quiz.totalQuestions) {
         updateChallengeFlags({ hasPerfectQuiz: true });
       }
@@ -110,7 +109,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
         updateChallengeFlags({ hasReverse80: true });
       }
     }
-  }, [handleComplete]);
+  }, [quiz.phase, quiz.score, quiz.totalQuestions, difficulty, reversed, updateChallengeFlags]);
 
   const handleStart = useCallback(
     (region: Region | "All", diff: Difficulty, rev: boolean) => {
@@ -244,6 +243,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
               <ProgressBar
                 current={quiz.currentIndex + 1}
                 total={quiz.totalQuestions}
+                onQuit={quiz.reset}
               />
               <div className="mt-6 rounded-2xl bg-navy-light border border-navy-lighter p-6 flex flex-col items-center">
                 {renderPrompt(quiz.currentQuestion)}
@@ -282,6 +282,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
               selectedAnswer={quiz.selectedAnswer}
               isHardMode={difficulty === "hard"}
               inputPlaceholder="Type the country name..."
+              onQuit={quiz.reset}
             />
           )
         )}

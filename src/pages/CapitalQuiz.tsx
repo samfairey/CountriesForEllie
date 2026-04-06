@@ -225,6 +225,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
                 ? "Type the country name..."
                 : "Type the capital city..."
             }
+            onQuit={quiz.reset}
           />
         )}
 

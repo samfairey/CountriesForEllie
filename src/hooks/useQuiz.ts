@@ -93,7 +93,7 @@ export function useQuiz<T>(config: QuizConfig<T>) {
       setResults(newResults);
       config.onAnswer?.(currentQuestion, correct);
 
-      const delay = correct ? 200 : 600;
+      const delay = correct ? 600 : 1200;
       setTimeout(() => {
         if (currentIndex + 1 >= totalQuestions) {
           if (timerRef.current) clearInterval(timerRef.current);

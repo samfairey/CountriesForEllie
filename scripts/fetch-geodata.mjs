@@ -130,11 +130,30 @@ async function main() {
 
     missing.delete(iso);
 
-    // Simplify geometry — tolerance in degrees (~0.015 ≈ ~1.7 km)
+    // Adaptive simplification — use country bbox size to pick tolerance.
+    // Small countries get much finer detail to avoid becoming simple polygons.
+    const bbox = turf.bbox(feature);
+    const bboxWidth = bbox[2] - bbox[0];
+    const bboxHeight = bbox[3] - bbox[1];
+    const bboxSpan = Math.max(bboxWidth, bboxHeight);
+
+    let tolerance;
+    if (bboxSpan < 0.5) {
+      tolerance = 0.0005; // micro states (Andorra, Monaco, Liechtenstein, Singapore, etc.)
+    } else if (bboxSpan < 2) {
+      tolerance = 0.002;  // small countries (Luxembourg, Brunei, etc.)
+    } else if (bboxSpan < 5) {
+      tolerance = 0.005;  // medium-small (Belgium, Netherlands, etc.)
+    } else if (bboxSpan < 15) {
+      tolerance = 0.01;   // medium (Portugal, UK, etc.)
+    } else {
+      tolerance = 0.015;  // large countries (Russia, Canada, etc.)
+    }
+
     let simplified;
     try {
       simplified = turf.simplify(feature, {
-        tolerance: 0.015,
+        tolerance,
         highQuality: true,
       });
     } catch {

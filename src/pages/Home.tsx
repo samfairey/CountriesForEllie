@@ -313,10 +313,10 @@ function QuizButton({
 
 function StatPill({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
-    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-navy-light/60 border border-navy-lighter/50 rounded-full shrink-0">
-      <span className="text-sm">{icon}</span>
-      <span className="text-white font-semibold text-sm">{value}</span>
-      <span className="text-slate-500 text-xs hidden sm:inline">{label}</span>
+    <div className="flex items-center gap-1.5 px-2.5 h-8 bg-navy-light/60 border border-navy-lighter/50 rounded-full shrink-0">
+      <span className="text-sm leading-none" role="img" aria-hidden="true">{icon}</span>
+      <span className="text-white font-semibold text-sm leading-none">{value}</span>
+      <span className="text-slate-500 text-xs leading-none hidden sm:inline">{label}</span>
     </div>
   );
 }

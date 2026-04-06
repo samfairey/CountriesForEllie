@@ -23,31 +23,31 @@ export function Nav() {
         <div className="flex items-center gap-3 text-sm">
           <button
             onClick={toggleSound}
-            className="text-slate-400 hover:text-white transition-colors p-1"
+            className="text-slate-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center"
             title={soundOn ? "Mute sounds" : "Unmute sounds"}
             aria-label={soundOn ? "Mute sounds" : "Unmute sounds"}
           >
-            {soundOn ? "🔊" : "🔇"}
+            <span className="text-base leading-none">{soundOn ? "🔊" : "🔇"}</span>
           </button>
           <Link
             to="/achievements"
-            className="text-slate-400 hover:text-white transition-colors p-1 no-underline"
+            className="text-slate-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center no-underline"
             title="Achievements"
             aria-label="Achievements"
           >
-            🏆
+            <span className="text-base leading-none">🏆</span>
           </Link>
           <Link
             to="/settings"
-            className="text-slate-400 hover:text-white transition-colors p-1 no-underline"
+            className="text-slate-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center no-underline"
             title="Settings"
             aria-label="Settings"
           >
-            ⚙️
+            <span className="text-base leading-none">⚙️</span>
           </Link>
-          <div className="flex items-center gap-1.5 text-gold ml-1">
-            <span>🔥</span>
-            <span className="font-semibold">{progress.currentStreak}</span>
+          <div className="flex items-center gap-1.5 text-gold ml-1 h-8">
+            <span className="text-base leading-none">🔥</span>
+            <span className="font-semibold leading-none">{progress.currentStreak}</span>
           </div>
         </div>
       </div>

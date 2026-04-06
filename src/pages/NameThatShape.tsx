@@ -320,10 +320,9 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.25 }}
-                className="flex flex-col max-w-2xl mx-auto"
-                style={{ height: "calc(100vh - 3.5rem)" }}
+                className="max-w-2xl mx-auto"
               >
-                <div className="px-4 pt-4 flex-shrink-0">
+                <div className="px-4 pt-4">
                   <ProgressBar
                     current={quiz.currentIndex + 1}
                     total={quiz.totalQuestions}
@@ -332,15 +331,12 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 </div>
 
                 {/* Country name prompt */}
-                <div className="px-4 py-3 flex-shrink-0">
+                <div className="px-4 py-3">
                   {renderReversePrompt()}
                 </div>
 
-                {/* Spacer pushes options to bottom */}
-                <div className="flex-1 min-h-0" />
-
-                {/* Shape options pinned to bottom */}
-                <div className="px-4 pb-4 flex-shrink-0">
+                {/* Shape options */}
+                <div className="px-4 pb-4">
                   {renderReverseShapeOptions()}
 
                   {/* Feedback */}

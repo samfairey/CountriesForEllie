@@ -28,6 +28,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+// Shared canvas renderer — much faster than SVG for 195 features
+const canvasRenderer = L.canvas({ padding: 0.5 });
+
 export interface CapitalMarker {
   lat: number;
   lng: number;
@@ -67,6 +70,7 @@ const DEFAULT_STYLE: PathOptions = {
   weight: 1,
   fillColor: "#1e293b",
   fillOpacity: 0.6,
+  renderer: canvasRenderer,
 };
 
 const CLEAN_DEFAULT_STYLE: PathOptions = {
@@ -74,6 +78,7 @@ const CLEAN_DEFAULT_STYLE: PathOptions = {
   weight: 1,
   fillColor: "#1e293b",
   fillOpacity: 1,
+  renderer: canvasRenderer,
 };
 
 const HIGHLIGHT_STYLE: PathOptions = {
@@ -81,6 +86,7 @@ const HIGHLIGHT_STYLE: PathOptions = {
   fillOpacity: 0.35,
   color: "#0ea5e9",
   weight: 2,
+  renderer: canvasRenderer,
 };
 
 const SELECTED_STYLE: PathOptions = {
@@ -88,6 +94,7 @@ const SELECTED_STYLE: PathOptions = {
   fillOpacity: 0.5,
   color: "#38bdf8",
   weight: 2.5,
+  renderer: canvasRenderer,
 };
 
 const CORRECT_STYLE: PathOptions = {
@@ -95,6 +102,7 @@ const CORRECT_STYLE: PathOptions = {
   fillOpacity: 0.5,
   color: "#10b981",
   weight: 2.5,
+  renderer: canvasRenderer,
 };
 
 const WRONG_STYLE: PathOptions = {
@@ -102,6 +110,7 @@ const WRONG_STYLE: PathOptions = {
   fillOpacity: 0.5,
   color: "#f43f5e",
   weight: 2.5,
+  renderer: canvasRenderer,
 };
 
 const HOVER_STYLE: PathOptions = {
@@ -189,6 +198,63 @@ function ScrollZoomManager() {
   return null;
 }
 
+/**
+ * Sub-component that imperatively updates GeoJSON layer styles
+ * without re-mounting the entire layer tree.
+ */
+function StyleUpdater({
+  layerRef,
+  highlightedCountries,
+  selectedCountry,
+  correctCountry,
+  wrongCountry,
+  showBorders,
+  cleanMap,
+  correctAsHighlight,
+}: {
+  layerRef: React.RefObject<L.GeoJSON | null>;
+  highlightedCountries: string[];
+  selectedCountry: string | null;
+  correctCountry: string | null;
+  wrongCountry: string | null;
+  showBorders: boolean;
+  cleanMap: boolean;
+  correctAsHighlight: boolean;
+}) {
+  const baseStyle = cleanMap ? CLEAN_DEFAULT_STYLE : DEFAULT_STYLE;
+  const highlightSet = new Set(highlightedCountries.map((id) => id.toLowerCase()));
+
+  useEffect(() => {
+    const layer = layerRef.current;
+    if (!layer) return;
+
+    layer.eachLayer((l) => {
+      const featureLayer = l as L.Path & { feature?: Feature };
+      const iso = (featureLayer.feature?.properties?.ISO_A2 || "").toLowerCase();
+
+      let style: PathOptions;
+      if (correctCountry && iso === correctCountry.toLowerCase()) {
+        style = correctAsHighlight
+          ? { ...HIGHLIGHT_STYLE, fillOpacity: 0.6, weight: 3 }
+          : CORRECT_STYLE;
+      } else if (wrongCountry && iso === wrongCountry.toLowerCase()) {
+        style = WRONG_STYLE;
+      } else if (selectedCountry && iso === selectedCountry.toLowerCase()) {
+        style = SELECTED_STYLE;
+      } else if (highlightSet.has(iso)) {
+        style = HIGHLIGHT_STYLE;
+      } else if (!showBorders) {
+        style = { ...baseStyle, color: "transparent", weight: 0 };
+      } else {
+        style = baseStyle;
+      }
+      featureLayer.setStyle(style);
+    });
+  }, [highlightedCountries, selectedCountry, correctCountry, wrongCountry, showBorders, cleanMap, correctAsHighlight, baseStyle, layerRef]);
+
+  return null;
+}
+
 export const WorldMap = memo(function WorldMap({
   interactive = true,
   highlightedCountries = [],
@@ -207,7 +273,7 @@ export const WorldMap = memo(function WorldMap({
   className = "",
 }: WorldMapProps) {
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
-  const highlightSet = new Set(highlightedCountries.map((id) => id.toLowerCase()));
+  const geoLayerRef = useRef<L.GeoJSON | null>(null);
 
   useEffect(() => {
     loadGeoJson().then(setGeoData);
@@ -215,26 +281,15 @@ export const WorldMap = memo(function WorldMap({
 
   const baseStyle = cleanMap ? CLEAN_DEFAULT_STYLE : DEFAULT_STYLE;
 
-  const getStyle = useCallback(
-    (feature?: Feature): PathOptions => {
-      if (!feature) return baseStyle;
-      const iso = (feature.properties?.ISO_A2 || "").toLowerCase();
-
-      if (correctCountry && iso === correctCountry.toLowerCase())
-        return correctAsHighlight
-          ? { ...HIGHLIGHT_STYLE, fillOpacity: 0.6, weight: 3 }
-          : CORRECT_STYLE;
-      if (wrongCountry && iso === wrongCountry.toLowerCase()) return WRONG_STYLE;
-      if (selectedCountry && iso === selectedCountry.toLowerCase()) return SELECTED_STYLE;
-      if (highlightSet.has(iso)) return HIGHLIGHT_STYLE;
-
+  // Initial style callback (used only on first mount of GeoJSON layer)
+  const getInitialStyle = useCallback(
+    (_feature?: Feature): PathOptions => {
       if (!showBorders) {
         return { ...baseStyle, color: "transparent", weight: 0 };
       }
-
       return baseStyle;
     },
-    [highlightSet, selectedCountry, correctCountry, wrongCountry, showBorders, baseStyle, correctAsHighlight]
+    [showBorders, baseStyle]
   );
 
   const onEachFeature = useCallback(
@@ -246,20 +301,28 @@ export const WorldMap = memo(function WorldMap({
 
       layer.on({
         mouseover: () => {
-          // Don't override correct/wrong/selected styles
+          const currentStyle = (pathLayer.options as PathOptions);
+          // Don't override special styles (check fill color)
+          const fill = currentStyle.fillColor;
           if (
-            iso === correctCountry?.toLowerCase() ||
-            iso === wrongCountry?.toLowerCase() ||
-            iso === selectedCountry?.toLowerCase()
+            fill === CORRECT_STYLE.fillColor ||
+            fill === WRONG_STYLE.fillColor ||
+            fill === SELECTED_STYLE.fillColor ||
+            fill === HIGHLIGHT_STYLE.fillColor
           )
             return;
           pathLayer.setStyle({
-            ...getStyle(feature),
+            ...currentStyle,
             ...HOVER_STYLE,
           });
         },
         mouseout: () => {
-          pathLayer.setStyle(getStyle(feature));
+          // Reset to base style — StyleUpdater will correct if needed
+          pathLayer.setStyle(
+            !showBorders
+              ? { ...baseStyle, color: "transparent", weight: 0 }
+              : baseStyle
+          );
         },
         click: (e: LeafletMouseEvent) => {
           L.DomEvent.stopPropagation(e);
@@ -267,11 +330,11 @@ export const WorldMap = memo(function WorldMap({
         },
       });
     },
-    [interactive, onCountryClick, getStyle, correctCountry, wrongCountry, selectedCountry]
+    [interactive, onCountryClick, showBorders, baseStyle]
   );
 
-  // Use a key that changes when style-affecting props change, forcing GeoJSON re-render
-  const geoKey = `${selectedCountry}-${correctCountry}-${wrongCountry}-${highlightedCountries.join(",")}-${showBorders}`;
+  // Stable key — only changes if geoData itself changes (load), never on style changes
+  const geoKey = geoData ? "geo-loaded" : "geo-pending";
 
   return (
     <MapContainer
@@ -283,8 +346,17 @@ export const WorldMap = memo(function WorldMap({
       attributionControl={false}
       className={`w-full h-full ${className}`}
       style={{ background: "#0f172a" }}
+      renderer={canvasRenderer}
     >
-      {!cleanMap && <TileLayer url={DARK_TILES} attribution={DARK_TILES_ATTR} />}
+      {!cleanMap && (
+        <TileLayer
+          url={DARK_TILES}
+          attribution={DARK_TILES_ATTR}
+          updateWhenZooming={false}
+          updateWhenIdle={true}
+          keepBuffer={4}
+        />
+      )}
       <ScrollZoomManager />
       <ZoomController zoomToCountry={zoomToCountry} />
       {initialBounds && <InitialBoundsController bounds={initialBounds} />}
@@ -292,11 +364,22 @@ export const WorldMap = memo(function WorldMap({
       {geoData && (
         <GeoJSON
           key={geoKey}
+          ref={geoLayerRef}
           data={geoData}
-          style={getStyle}
+          style={getInitialStyle}
           onEachFeature={onEachFeature}
         />
       )}
+      <StyleUpdater
+        layerRef={geoLayerRef}
+        highlightedCountries={highlightedCountries}
+        selectedCountry={selectedCountry}
+        correctCountry={correctCountry}
+        wrongCountry={wrongCountry}
+        showBorders={showBorders}
+        cleanMap={cleanMap}
+        correctAsHighlight={correctAsHighlight}
+      />
       {capitals.map((cap) => (
         <CircleMarker
           key={`${cap.lat}-${cap.lng}`}

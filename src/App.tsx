@@ -22,6 +22,9 @@ const NameThatShape = lazy(() =>
 const BlitzMode = lazy(() =>
   import("./pages/BlitzMode").then((m) => ({ default: m.BlitzMode }))
 );
+const MasterMode = lazy(() =>
+  import("./pages/MasterMode").then((m) => ({ default: m.MasterMode }))
+);
 
 function LoadingFallback() {
   return (
@@ -100,6 +103,14 @@ export default function App() {
             element={
               <Suspense fallback={<LoadingFallback />}>
                 <BlitzMode onAchievements={showAchievementToast} />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/master-mode"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <MasterMode onAchievements={showAchievementToast} />
               </Suspense>
             }
           />

@@ -49,6 +49,7 @@ export function useSettings() {
     localStorage.removeItem("atlas-achievements");
     localStorage.removeItem("atlas-challenge-flags");
     localStorage.removeItem("atlas-blitz-leaderboard");
+    localStorage.removeItem("atlas-mastered-countries");
     window.location.reload();
   }, []);
 

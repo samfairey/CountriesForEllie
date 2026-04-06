@@ -5,6 +5,7 @@ import { useProgress } from "../hooks/useProgress";
 import { useAchievements } from "../hooks/useAchievements";
 import { useSettings, type DefaultDifficulty } from "../hooks/useSettings";
 import { getHighScore } from "../types/blitz";
+import { getMasteredCount } from "../hooks/useMastery";
 import type { Region } from "../types/country";
 
 const container = {
@@ -65,6 +66,7 @@ export function Home() {
   const navigate = useNavigate();
   const blitzHigh = getHighScore(180);
   const mastered = countMastered(progress.countryStats);
+  const masterModeMastered = getMasteredCount();
 
   const region = settings.defaultRegion;
   const difficulty = settings.defaultDifficulty;
@@ -224,7 +226,7 @@ export function Home() {
       </motion.div>
 
       {/* Blitz Mode — standalone */}
-      <motion.div variants={item}>
+      <motion.div variants={item} className="mb-4">
         <Link to="/blitz" className="no-underline block">
           <div className="w-full rounded-2xl p-4 border bg-gradient-to-r from-amber-500/10 via-navy-light to-orange-500/5 border-amber-500/40 hover:border-amber-500/70 hover:shadow-lg hover:shadow-amber-500/5 transition-all text-left flex items-center gap-4">
             <span className="text-3xl" role="img" aria-hidden="true">⚡</span>
@@ -235,6 +237,29 @@ export function Home() {
             <span className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-full shrink-0 transition-colors">
               Play
             </span>
+          </div>
+        </Link>
+      </motion.div>
+
+      {/* Master Mode — standalone */}
+      <motion.div variants={item}>
+        <Link to="/master-mode" className="no-underline block">
+          <div className="w-full rounded-2xl p-4 border bg-gradient-to-r from-violet-500/10 via-navy-light to-purple-500/5 border-violet-500/40 hover:border-violet-500/70 hover:shadow-lg hover:shadow-violet-500/5 transition-all text-left flex items-center gap-4">
+            <span className="text-3xl" role="img" aria-hidden="true">👑</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-white font-semibold text-sm">Master Mode</div>
+              <div className="text-slate-400 text-xs">Flag + Capital + Map — master every country</div>
+            </div>
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <span className="px-3 py-1 bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium rounded-full transition-colors">
+                Play
+              </span>
+              {masterModeMastered > 0 && (
+                <span className="text-xs text-violet-400 font-medium">
+                  {masterModeMastered}/195
+                </span>
+              )}
+            </div>
           </div>
         </Link>
       </motion.div>

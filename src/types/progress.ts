@@ -4,7 +4,7 @@ export interface CountryModeStats {
   lastSeen: string; // ISO date string
 }
 
-export type GameMode = "flag-quiz" | "pin-the-map" | "name-that-shape" | "capital-quiz" | "blitz";
+export type GameMode = "flag-quiz" | "pin-the-map" | "name-that-shape" | "capital-quiz" | "blitz" | "master-mode";
 
 export interface ProgressData {
   /** per-country, per-mode stats: key = `${countryId}:${mode}` */

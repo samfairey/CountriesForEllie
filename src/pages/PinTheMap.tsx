@@ -270,8 +270,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                 wrongCountry={wrongId}
                 onCountryClick={handleMapClick}
                 zoomToCountry={
-                  zoomTarget ||
-                  (reversed && difficulty === "easy" ? q.subject.id : null)
+                  zoomTarget || (reversed ? q.subject.id : null)
                 }
                 showBorders
                 capitals={capitals}

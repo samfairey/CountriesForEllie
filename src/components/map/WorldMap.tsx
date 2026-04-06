@@ -282,14 +282,18 @@ export const WorldMap = memo(function WorldMap({
   const baseStyle = cleanMap ? CLEAN_DEFAULT_STYLE : DEFAULT_STYLE;
 
   // Initial style callback (used only on first mount of GeoJSON layer)
+  // When interactive is false (reverse mode), mark features as non-interactive
+  // so the Canvas renderer won't capture pointer events, allowing map pan/zoom.
   const getInitialStyle = useCallback(
     (_feature?: Feature): PathOptions => {
-      if (!showBorders) {
-        return { ...baseStyle, color: "transparent", weight: 0 };
-      }
-      return baseStyle;
+      const base = !showBorders
+        ? { ...baseStyle, color: "transparent", weight: 0 }
+        : baseStyle;
+      return interactive
+        ? base
+        : ({ ...base, interactive: false } as PathOptions);
     },
-    [showBorders, baseStyle]
+    [showBorders, baseStyle, interactive]
   );
 
   const onEachFeature = useCallback(

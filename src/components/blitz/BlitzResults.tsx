@@ -254,7 +254,7 @@ export function BlitzResults({
         </button>
         <button
           onClick={() => {
-            const text = `⚡ Atlas Blitz: ${score.toLocaleString()} pts | ${accuracy}% accuracy | 🔥${bestStreak} streak | ${timeLimit / 60}min`;
+            const text = `⚡ El Atlas Blitz: ${score.toLocaleString()} pts | ${accuracy}% accuracy | 🔥${bestStreak} streak | ${timeLimit / 60}min`;
             navigator.clipboard.writeText(text).catch(() => {});
           }}
           className="px-4 py-3 bg-navy-lighter hover:bg-navy-lighter/80 text-slate-300 font-semibold rounded-xl transition-colors"

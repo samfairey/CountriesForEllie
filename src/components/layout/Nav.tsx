@@ -18,7 +18,7 @@ export function Nav() {
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-white font-bold text-lg no-underline">
           <span className="text-2xl">🌍</span>
-          <span>Atlas</span>
+          <span>El Atlas</span>
         </Link>
         <div className="flex items-center gap-3 text-sm">
           <button

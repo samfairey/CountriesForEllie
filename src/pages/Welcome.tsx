@@ -61,7 +61,7 @@ export function Welcome() {
                 🌍
               </motion.div>
               <h1 className="text-4xl font-bold text-white mb-3">
-                Welcome to <span className="text-sky">Atlas</span>
+                Welcome to <span className="text-sky">El Atlas</span>
               </h1>
               <p className="text-slate-400 text-lg mb-8 max-w-sm mx-auto">
                 Master every country in the world — their flags, capitals, locations, and shapes

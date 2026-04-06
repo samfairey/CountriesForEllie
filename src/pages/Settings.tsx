@@ -112,7 +112,7 @@ export function Settings() {
         <div className="bg-navy-light border border-navy-lighter rounded-xl p-4">
           <div className="text-white font-medium mb-2">About</div>
           <div className="text-xs text-slate-400 space-y-1">
-            <p>Atlas v1.0.0 — A geography learning app</p>
+            <p>El Atlas v1.0.0 — A geography learning app</p>
             <p>Country data: 195 UN-recognised sovereign states</p>
             <p>Flags: flagcdn.com</p>
             <p>Map borders: Natural Earth via datasets/geo-countries</p>

@@ -146,24 +146,25 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
   const handleMapClick = useCallback(
     (countryId: string) => {
-      if (!quiz.currentQuestion || pendingAnswer.current || quiz.lastAnswerCorrect !== null || reversed) return;
+      const q = quizRef.current;
+      if (!q.currentQuestion || pendingAnswer.current || q.lastAnswerCorrect !== null || reversed) return;
       pendingAnswer.current = true;
 
-      const correct = countryId === quiz.currentQuestion.correctAnswer;
+      const correct = countryId === q.currentQuestion.correctAnswer;
       if (correct) {
         setCorrectId(countryId);
         setWrongId(null);
       } else {
         setWrongId(countryId);
-        setCorrectId(quiz.currentQuestion.correctAnswer);
-        setZoomTarget(quiz.currentQuestion.correctAnswer);
+        setCorrectId(q.currentQuestion.correctAnswer);
+        setZoomTarget(q.currentQuestion.correctAnswer);
       }
 
       // Show feedback on map, then submit answer and reset
       const delay = correct ? 800 : 1800;
       setTimeout(() => {
         pendingAnswer.current = false;
-        quiz.submitAnswer(countryId);
+        quizRef.current.submitAnswer(countryId);
         setCorrectId(null);
         setWrongId(null);
         setZoomTarget(null);
@@ -172,22 +173,23 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         }
       }, delay);
     },
-    [quiz, reversed]
+    [reversed]
   );
 
   const handleMcAnswer = useCallback(
     (answer: string) => {
-      if (!quiz.currentQuestion || quiz.lastAnswerCorrect !== null) return;
-      quiz.submitAnswer(answer);
+      const q = quizRef.current;
+      if (!q.currentQuestion || q.lastAnswerCorrect !== null) return;
+      q.submitAnswer(answer);
 
       // Reset zoom after advance
-      const correct = answer === quiz.currentQuestion.correctAnswer;
+      const correct = answer === q.currentQuestion.correctAnswer;
       const delay = correct ? 200 : 600;
       setTimeout(() => {
         setZoomTarget(null);
       }, delay);
     },
-    [quiz]
+    []
   );
 
   const q = quiz.currentQuestion;
@@ -205,7 +207,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   }, [region]);
 
   return (
-    <div className="flex flex-col" style={{ minHeight: "calc(100vh - 3.5rem)" }}>
+    <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
       <AnimatePresence mode="wait">
         {quiz.phase === "setup" && (
           <div key="setup" className="flex-1 flex items-start justify-center pt-8">
@@ -259,7 +261,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
             </div>
 
             {/* Map */}
-            <div className="flex-1 relative" style={{ minHeight: 300 }}>
+            <div className="flex-1 relative min-h-0">
               <WorldMap
                 interactive={!reversed}
                 highlightedCountries={reversed ? [q.subject.id] : []}

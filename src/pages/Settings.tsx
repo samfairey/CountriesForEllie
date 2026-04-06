@@ -2,17 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useSettings } from "../hooks/useSettings";
-import { setSoundEnabled } from "../utils/sounds";
 
 export function Settings() {
   const { settings, update, resetProgress } = useSettings();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-
-  const toggleSound = () => {
-    const next = !settings.soundEnabled;
-    update({ soundEnabled: next });
-    setSoundEnabled(next);
-  };
 
   return (
     <motion.div
@@ -24,30 +17,6 @@ export function Settings() {
       <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
 
       <div className="space-y-6">
-        {/* Sound Effects */}
-        <div className="bg-navy-light border border-navy-lighter rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-white font-medium">Sound Effects</div>
-              <div className="text-xs text-slate-400">Quiz feedback and achievement sounds</div>
-            </div>
-            <button
-              onClick={toggleSound}
-              className={`w-12 h-7 rounded-full transition-colors relative ${
-                settings.soundEnabled ? "bg-sky" : "bg-navy-lighter"
-              }`}
-              role="switch"
-              aria-checked={settings.soundEnabled}
-            >
-              <div
-                className={`w-5 h-5 bg-white rounded-full absolute top-1 transition-transform ${
-                  settings.soundEnabled ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-          </div>
-        </div>
-
         {/* Reduced Motion */}
         <div className="bg-navy-light border border-navy-lighter rounded-xl p-4">
           <div className="flex items-center justify-between">

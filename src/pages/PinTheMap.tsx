@@ -10,6 +10,7 @@ import { useProgress } from "../hooks/useProgress";
 import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { shuffle } from "../utils/shuffle";
 import { preloadGeoJson } from "../utils/geoData";
+import { playCorrect, playWrong } from "../utils/sounds";
 import { getSettings } from "../hooks/useSettings";
 import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
 import { ProgressBar } from "../components/common/ProgressBar";
@@ -173,6 +174,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
       pendingAnswer.current = true;
 
       const correct = countryId === q.currentQuestion.correctAnswer;
+      if (correct) playCorrect(); else playWrong();
       if (correct) {
         setCorrectId(countryId);
         setWrongId(null);

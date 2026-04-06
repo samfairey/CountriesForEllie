@@ -17,6 +17,7 @@ import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
 import { ProgressBar } from "../components/common/ProgressBar";
 import { CountryOutline } from "../components/quiz/CountryOutline";
+import { WorldMap } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
@@ -87,27 +88,43 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
   const autoStarted = useRef(false);
   const lastRegion = useRef<Region | "All">("All");
 
+  // Refs for config to avoid stale closure in startQuiz
+  const reversedRef = useRef(false);
+  const difficultyRef = useRef<Difficulty>("easy");
+
+  // Track correctly answered country IDs for the world map
+  const [correctCountries, setCorrectCountries] = useState<string[]>([]);
+
   useEffect(() => {
     preloadGeoJson();
   }, []);
 
   const config = useMemo(
     () => ({
-      generateQuestions: reversed ? generateReverseShapeQuestions : generateShapeQuestions,
+      generateQuestions: (pool: Country[], count: number, optionCount: number) => {
+        return reversedRef.current
+          ? generateReverseShapeQuestions(pool, count, optionCount)
+          : generateShapeQuestions(pool, count, optionCount);
+      },
       checkAnswer:
-        !reversed && difficulty === "hard"
-          ? (input: string, q: QuizQuestion<Country>) =>
-              fuzzyMatch(input, q.correctAnswer, q.subject.alternatives)
-          : undefined,
+        (input: string, q: QuizQuestion<Country>) => {
+          if (!reversedRef.current && difficultyRef.current === "hard") {
+            return fuzzyMatch(input, q.correctAnswer, q.subject.alternatives);
+          }
+          return input === q.correctAnswer;
+        },
       onAnswer: (q: QuizQuestion<Country>, correct: boolean) => {
         recordAnswer(q.subject.id, "name-that-shape", correct);
+        if (correct) {
+          setCorrectCountries((prev) => [...prev, q.subject.id]);
+        }
       },
       onComplete: () => {
         completeQuiz();
         updateChallengeFlags({ modesPlayed: ["name-that-shape"] });
       },
     }),
-    [difficulty, reversed, recordAnswer, completeQuiz]
+    [recordAnswer, completeQuiz]
   );
 
   const quiz = useQuiz<Country>(config);
@@ -116,9 +133,13 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
 
   const handleStart = useCallback(
     async (region: Region | "All", diff: Difficulty, rev: boolean) => {
+      // Update refs before starting quiz so config reads correct values
+      reversedRef.current = rev;
+      difficultyRef.current = diff;
       setDifficulty(diff);
       setReversed(rev);
       lastRegion.current = region;
+      setCorrectCountries([]);
       setLoading(true);
 
       const geo = await loadGeoJson();
@@ -224,7 +245,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
     const answered = quiz.lastAnswerCorrect !== null;
 
     return (
-      <div className="grid grid-cols-2 gap-3 max-w-xl mx-auto mt-6">
+      <div className="grid grid-cols-2 gap-3 max-w-xl mx-auto">
         {q.options.map((optionId) => {
           const geo = getGeometry(optionId);
           if (!geo) return null;
@@ -274,6 +295,25 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
     );
   };
 
+  // World map showing correctly answered countries
+  const renderWorldMap = () => {
+    if (correctCountries.length === 0) return null;
+    return (
+      <div className="h-28 sm:h-36 w-full rounded-xl overflow-hidden border border-navy-lighter mb-3 relative">
+        <WorldMap
+          interactive={false}
+          highlightedCountries={correctCountries}
+          showBorders
+          cleanMap
+          className="absolute inset-0"
+        />
+        <div className="absolute bottom-1 right-2 text-xs text-slate-500 bg-navy/80 px-1.5 py-0.5 rounded">
+          {correctCountries.length} ✓
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <AnimatePresence mode="wait">
@@ -307,53 +347,74 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.25 }}
-                className="max-w-2xl mx-auto"
+                className="flex flex-col max-w-2xl mx-auto"
+                style={{ height: "calc(100vh - 3.5rem)" }}
               >
-                <ProgressBar
-                  current={quiz.currentIndex + 1}
-                  total={quiz.totalQuestions}
-                  onQuit={goHome}
-                />
-                <div className="mt-6 rounded-2xl bg-navy-light border border-navy-lighter p-6 flex flex-col items-center">
+                <div className="px-4 pt-4">
+                  <ProgressBar
+                    current={quiz.currentIndex + 1}
+                    total={quiz.totalQuestions}
+                    onQuit={goHome}
+                  />
+                </div>
+
+                {/* World map strip */}
+                <div className="px-4 mt-3">
+                  {renderWorldMap()}
+                </div>
+
+                {/* Country name prompt - compact */}
+                <div className="px-4 py-2 flex-shrink-0">
                   {renderReversePrompt()}
                 </div>
-                {renderReverseShapeOptions()}
 
-                {/* Feedback */}
-                <AnimatePresence>
-                  {quiz.lastAnswerCorrect !== null && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className={`mt-4 p-3 rounded-xl text-center font-semibold ${
-                        quiz.lastAnswerCorrect
-                          ? "bg-emerald/15 text-emerald"
-                          : "bg-rose/15 text-rose"
-                      }`}
-                    >
-                      {quiz.lastAnswerCorrect
-                        ? "Correct!"
-                        : `Wrong — it was ${countryById.get(q.correctAnswer)?.name ?? q.correctAnswer}`}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {/* Shape options pinned to bottom */}
+                <div className="flex-1" />
+                <div className="px-4 pb-4">
+                  {renderReverseShapeOptions()}
+
+                  {/* Feedback */}
+                  <AnimatePresence>
+                    {quiz.lastAnswerCorrect !== null && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className={`mt-3 p-3 rounded-xl text-center font-semibold ${
+                          quiz.lastAnswerCorrect
+                            ? "bg-emerald/15 text-emerald"
+                            : "bg-rose/15 text-rose"
+                        }`}
+                      >
+                        {quiz.lastAnswerCorrect
+                          ? "Correct!"
+                          : `Wrong — it was ${countryById.get(q.correctAnswer)?.name ?? q.correctAnswer}`}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.div>
             ) : (
-              <QuizQuestionView
-                key={`q-${quiz.currentIndex}`}
-                prompt={renderStandardPrompt()}
-                correctAnswer={q.correctAnswer}
-                options={q.options}
-                currentIndex={quiz.currentIndex}
-                totalQuestions={quiz.totalQuestions}
-                onAnswer={quiz.submitAnswer}
-                lastAnswerCorrect={quiz.lastAnswerCorrect}
-                selectedAnswer={quiz.selectedAnswer}
-                isHardMode={isHardMode}
-                inputPlaceholder="Type the country name..."
-                onQuit={goHome}
-              />
+              <div>
+                {/* World map for standard mode */}
+                <div className="max-w-2xl mx-auto px-4 mt-4">
+                  {renderWorldMap()}
+                </div>
+                <QuizQuestionView
+                  key={`q-${quiz.currentIndex}`}
+                  prompt={renderStandardPrompt()}
+                  correctAnswer={q.correctAnswer}
+                  options={q.options}
+                  currentIndex={quiz.currentIndex}
+                  totalQuestions={quiz.totalQuestions}
+                  onAnswer={quiz.submitAnswer}
+                  lastAnswerCorrect={quiz.lastAnswerCorrect}
+                  selectedAnswer={quiz.selectedAnswer}
+                  isHardMode={isHardMode}
+                  inputPlaceholder="Type the country name..."
+                  onQuit={goHome}
+                />
+              </div>
             )}
           </div>
         )}

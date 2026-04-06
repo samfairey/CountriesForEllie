@@ -10,6 +10,7 @@ import { useMastery } from "../hooks/useMastery";
 import { getSettings } from "../hooks/useSettings";
 import { shuffle } from "../utils/shuffle";
 import { preloadGeoJson } from "../utils/geoData";
+import { playCorrect, playWrong } from "../utils/sounds";
 import { WorldMap } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
 
@@ -198,6 +199,7 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
     (answerId: string) => {
       if (selectedAnswer !== null || !currentCountry) return;
       const correct = answerId === currentCountry.id;
+      if (correct) playCorrect(); else playWrong();
       setSelectedAnswer(answerId);
       setLastCorrect(correct);
       recordAnswer(currentCountry.id, "master-mode", correct);
@@ -217,6 +219,7 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
     (answer: string) => {
       if (selectedAnswer !== null || !currentCountry) return;
       const correct = answer === currentCountry.capital;
+      if (correct) playCorrect(); else playWrong();
       setSelectedAnswer(answer);
       setLastCorrect(correct);
       recordAnswer(currentCountry.id, "master-mode", correct);
@@ -238,6 +241,7 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
       pendingAdvance.current = true;
 
       const correct = countryId === currentCountry.id;
+      if (correct) playCorrect(); else playWrong();
       recordAnswer(currentCountry.id, "master-mode", correct);
 
       if (correct) {

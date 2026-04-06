@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { playCorrect, playWrong } from "../utils/sounds";
 
 export type QuizPhase = "setup" | "playing" | "results";
 
@@ -81,6 +82,7 @@ export function useQuiz<T>(config: QuizConfig<T>) {
         correct = answer === currentQuestion.correctAnswer;
       }
 
+      if (correct) playCorrect(); else playWrong();
       setLastAnswerCorrect(correct);
       setSelectedAnswer(answer);
 

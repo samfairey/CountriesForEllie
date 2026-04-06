@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useRef, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -75,11 +75,13 @@ function generateReverseCapitalQuestions(
 export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
   const { recordAnswer, completeQuiz, progress } = useProgress();
   const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
+  const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [preloading, setPreloading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const autoStarted = useRef(false);
+  const lastRegion = useRef<Region | "All">("All");
 
   const config = useMemo(
     () => ({
@@ -118,6 +120,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
     (region: Region | "All", diff: Difficulty, rev: boolean) => {
       setDifficulty(diff);
       setReversed(rev);
+      lastRegion.current = region;
       const pool =
         region === "All" ? countries : countries.filter((c) => c.region === region);
       const count = Math.min(QUESTIONS_PER_ROUND, pool.length);
@@ -149,12 +152,18 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
     if (autoStarted.current) return;
     if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
       autoStarted.current = true;
+      const rev = searchParams.get("reverse") === "1";
       setSearchParams({}, { replace: true });
       const saved = getSettings();
       const diff = saved.defaultDifficulty as Difficulty;
-      handleStart(saved.defaultRegion, diff, false);
+      handleStart(saved.defaultRegion, diff, rev);
     }
   }, [searchParams, quiz.phase, handleStart, setSearchParams]);
+
+  const goHome = useCallback(() => navigate("/"), [navigate]);
+  const replay = useCallback(() => {
+    handleStart(lastRegion.current, difficulty, reversed);
+  }, [handleStart, difficulty, reversed]);
 
   const renderPrompt = (q: QuizQuestion<Country>) => {
     const showFlag = difficulty === "easy";
@@ -217,7 +226,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
                 description="Test your knowledge of world capitals. Choose a region and difficulty to begin."
                 onStart={handleStart}
                 showReverse
-                reverseLabel={["Country → Capital", "Capital → Country"]}
+                reverseLabel={["Country \u2192 Capital", "Capital \u2192 Country"]}
                 difficulties={CAPITAL_DIFFICULTIES}
               />
             )}
@@ -241,7 +250,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
                 ? "Type the country name..."
                 : "Type the capital city..."
             }
-            onQuit={quiz.reset}
+            onQuit={goHome}
           />
         )}
 
@@ -252,7 +261,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
             score={quiz.score}
             totalQuestions={quiz.totalQuestions}
             elapsedMs={quiz.elapsedMs}
-            onPlayAgain={quiz.reset}
+            onPlayAgain={replay}
             renderWrongItem={(r) => (
               <div className="flex items-center gap-4 bg-navy-light border border-navy-lighter rounded-xl p-3">
                 <img

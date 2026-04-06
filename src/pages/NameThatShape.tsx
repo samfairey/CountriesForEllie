@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -77,6 +77,7 @@ const countryById = new Map(countries.map((c) => [c.id, c]));
 export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
   const { recordAnswer, completeQuiz, progress } = useProgress();
   const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
+  const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,6 +85,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
   const geoDataRef = useRef<FeatureCollection | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const autoStarted = useRef(false);
+  const lastRegion = useRef<Region | "All">("All");
 
   useEffect(() => {
     preloadGeoJson();
@@ -116,6 +118,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
     async (region: Region | "All", diff: Difficulty, rev: boolean) => {
       setDifficulty(diff);
       setReversed(rev);
+      lastRegion.current = region;
       setLoading(true);
 
       const geo = await loadGeoJson();
@@ -138,12 +141,18 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
     if (autoStarted.current) return;
     if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
       autoStarted.current = true;
+      const rev = searchParams.get("reverse") === "1";
       setSearchParams({}, { replace: true });
       const saved = getSettings();
       const diff = saved.defaultDifficulty as Difficulty;
-      handleStart(saved.defaultRegion, diff, false);
+      handleStart(saved.defaultRegion, diff, rev);
     }
   }, [searchParams, quiz.phase, handleStart, setSearchParams]);
+
+  const goHome = useCallback(() => navigate("/"), [navigate]);
+  const replay = useCallback(() => {
+    handleStart(lastRegion.current, difficulty, reversed);
+  }, [handleStart, difficulty, reversed]);
 
   const getGeometry = (countryId: string): Geometry | null => {
     const data = geoData ?? geoDataRef.current;
@@ -281,7 +290,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 description="Can you recognise countries by their outline? Test your geography skills!"
                 onStart={handleStart}
                 showReverse
-                reverseLabel={["Shape → Name", "Name → Shape"]}
+                reverseLabel={["Shape \u2192 Name", "Name \u2192 Shape"]}
                 difficulties={SHAPE_DIFFICULTIES}
                 disableHardWhenReversed
               />
@@ -303,7 +312,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 <ProgressBar
                   current={quiz.currentIndex + 1}
                   total={quiz.totalQuestions}
-                  onQuit={quiz.reset}
+                  onQuit={goHome}
                 />
                 <div className="mt-6 rounded-2xl bg-navy-light border border-navy-lighter p-6 flex flex-col items-center">
                   {renderReversePrompt()}
@@ -343,7 +352,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 selectedAnswer={quiz.selectedAnswer}
                 isHardMode={isHardMode}
                 inputPlaceholder="Type the country name..."
-                onQuit={quiz.reset}
+                onQuit={goHome}
               />
             )}
           </div>
@@ -356,7 +365,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
             score={quiz.score}
             totalQuestions={quiz.totalQuestions}
             elapsedMs={quiz.elapsedMs}
-            onPlayAgain={quiz.reset}
+            onPlayAgain={replay}
             renderWrongItem={(r) => {
               const geo = getGeometry(
                 reversed ? r.question.correctAnswer : r.question.subject.id

@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -68,6 +68,7 @@ function generateReversePinQuestions(
 export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
   const { recordAnswer, completeQuiz, progress } = useProgress();
   const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
+  const navigate = useNavigate();
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState<Region | "All">("All");
@@ -153,11 +154,17 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
     if (autoStarted.current) return;
     if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
       autoStarted.current = true;
+      const rev = searchParams.get("reverse") === "1";
       setSearchParams({}, { replace: true });
       const saved = getSettings();
-      startGame(saved.defaultRegion, false);
+      startGame(saved.defaultRegion, rev);
     }
   }, [searchParams, quiz.phase, startGame, setSearchParams]);
+
+  const goHome = useCallback(() => navigate("/"), [navigate]);
+  const replay = useCallback(() => {
+    startGame(region, reversed);
+  }, [startGame, region, reversed]);
 
   const handleMapClick = useCallback(
     (countryId: string) => {
@@ -231,7 +238,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                 description="Find countries on the world map. Test your geography knowledge!"
                 onStart={handleStart}
                 showReverse
-                reverseLabel={["Name → Map", "Map → Name"]}
+                reverseLabel={["Name \u2192 Map", "Map \u2192 Name"]}
                 difficulties={[{ value: "medium", label: "Medium", desc: "Borders only" }]}
               />
             )}
@@ -245,7 +252,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
               <ProgressBar
                 current={quiz.currentIndex + 1}
                 total={quiz.totalQuestions}
-                onQuit={quiz.reset}
+                onQuit={goHome}
               />
               {!reversed && (
                 <div className="flex items-center gap-3 mt-3">
@@ -362,7 +369,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
               score={quiz.score}
               totalQuestions={quiz.totalQuestions}
               elapsedMs={quiz.elapsedMs}
-              onPlayAgain={quiz.reset}
+              onPlayAgain={replay}
               renderWrongItem={(r) => (
                 <div className="flex items-center gap-4 bg-navy-light border border-navy-lighter rounded-xl p-3">
                   <img

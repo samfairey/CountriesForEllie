@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useRef, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -70,11 +70,14 @@ const countryById = new Map(countries.map((c) => [c.id, c]));
 export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
   const { recordAnswer, completeQuiz, progress } = useProgress();
   const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
+  const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [preloading, setPreloading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const autoStarted = useRef(false);
+  // Track last-used settings for replay
+  const lastRegion = useRef<Region | "All">("All");
 
   const config = useMemo(
     () => ({
@@ -119,6 +122,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
     (region: Region | "All", diff: Difficulty, rev: boolean) => {
       setDifficulty(diff);
       setReversed(rev);
+      lastRegion.current = region;
       const pool =
         region === "All" ? countries : countries.filter((c) => c.region === region);
       const count = Math.min(QUESTIONS_PER_ROUND, pool.length);
@@ -149,12 +153,18 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
     if (autoStarted.current) return;
     if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
       autoStarted.current = true;
+      const rev = searchParams.get("reverse") === "1";
       setSearchParams({}, { replace: true });
       const saved = getSettings();
       const diff = saved.defaultDifficulty as Difficulty;
-      handleStart(saved.defaultRegion, diff, false);
+      handleStart(saved.defaultRegion, diff, rev);
     }
   }, [searchParams, quiz.phase, handleStart, setSearchParams]);
+
+  const goHome = useCallback(() => navigate("/"), [navigate]);
+  const replay = useCallback(() => {
+    handleStart(lastRegion.current, difficulty, reversed);
+  }, [handleStart, difficulty, reversed]);
 
   const renderPrompt = (q: QuizQuestion<Country>) => {
     if (reversed) {
@@ -239,7 +249,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
                 description="How well do you know your flags? Choose a region and difficulty to begin."
                 onStart={handleStart}
                 showReverse
-                reverseLabel={["Flag → Country", "Country → Flag"]}
+                reverseLabel={["Flag \u2192 Country", "Country \u2192 Flag"]}
                 disableHardWhenReversed
               />
             )}
@@ -259,7 +269,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
               <ProgressBar
                 current={quiz.currentIndex + 1}
                 total={quiz.totalQuestions}
-                onQuit={quiz.reset}
+                onQuit={goHome}
               />
               <div className="mt-6 rounded-2xl bg-navy-light border border-navy-lighter p-6 flex flex-col items-center">
                 {renderPrompt(quiz.currentQuestion)}
@@ -298,7 +308,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
               selectedAnswer={quiz.selectedAnswer}
               isHardMode={difficulty === "hard"}
               inputPlaceholder="Type the country name..."
-              onQuit={quiz.reset}
+              onQuit={goHome}
             />
           )
         )}
@@ -310,7 +320,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
             score={quiz.score}
             totalQuestions={quiz.totalQuestions}
             elapsedMs={quiz.elapsedMs}
-            onPlayAgain={quiz.reset}
+            onPlayAgain={replay}
             renderWrongItem={(r) => (
               <div className="flex items-center gap-4 bg-navy-light border border-navy-lighter rounded-xl p-3">
                 <img

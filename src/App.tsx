@@ -1,15 +1,13 @@
 import { lazy, Suspense, useState, useCallback } from "react";
-import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { Shell } from "./components/layout/Shell";
 import { Home } from "./pages/Home";
 import { FlagQuiz } from "./pages/FlagQuiz";
 import { CapitalQuiz } from "./pages/CapitalQuiz";
 import { Settings } from "./pages/Settings";
 import { Achievements } from "./pages/Achievements";
-import { Welcome } from "./pages/Welcome";
 import { KeyboardShortcuts } from "./components/common/KeyboardShortcuts";
 import { AchievementToast } from "./components/common/AchievementToast";
-import { hasOnboarded } from "./hooks/useSettings";
 import type { Achievement } from "./data/achievements";
 
 // Lazy load map-heavy pages
@@ -62,8 +60,6 @@ export default function App() {
     }
   }, []);
 
-  const onboarded = hasOnboarded();
-
   return (
     <BrowserRouter>
       <KeyboardShortcuts />
@@ -72,12 +68,8 @@ export default function App() {
         onDismiss={() => setToastAchievements([])}
       />
       <Routes>
-        <Route path="/welcome" element={<Welcome />} />
         <Route element={<Shell />}>
-          <Route
-            path="/"
-            element={onboarded ? <Home /> : <Navigate to="/welcome" replace />}
-          />
+          <Route path="/" element={<Home />} />
           <Route path="/flag-quiz" element={<FlagQuiz onAchievements={showAchievementToast} />} />
           <Route path="/capital-quiz" element={<CapitalQuiz onAchievements={showAchievementToast} />} />
           <Route path="/settings" element={<Settings />} />

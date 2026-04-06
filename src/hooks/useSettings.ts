@@ -8,7 +8,6 @@ export interface AppSettings {
   defaultDifficulty: DefaultDifficulty;
   defaultRegion: Region | "All";
   reducedMotion: boolean;
-  hasOnboarded: boolean;
 }
 
 const STORAGE_KEY = "atlas-settings";
@@ -18,7 +17,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultDifficulty: "easy",
   defaultRegion: "All",
   reducedMotion: typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
-  hasOnboarded: false,
 };
 
 function loadSettings(): AppSettings {
@@ -59,16 +57,4 @@ export function useSettings() {
 /** Static read of saved settings (no hook needed) */
 export function getSettings(): AppSettings {
   return loadSettings();
-}
-
-/** Static check without hook (for routing) */
-export function hasOnboarded(): boolean {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return parsed.hasOnboarded === true;
-    }
-  } catch {}
-  return false;
 }

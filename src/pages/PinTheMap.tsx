@@ -76,6 +76,9 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   const [searchParams, setSearchParams] = useSearchParams();
   const autoStarted = useRef(false);
 
+  // Track correctly answered countries to keep them highlighted
+  const [answeredCorrect, setAnsweredCorrect] = useState<string[]>([]);
+
   // Map feedback state
   const [correctId, setCorrectId] = useState<string | null>(null);
   const [wrongId, setWrongId] = useState<string | null>(null);
@@ -93,6 +96,9 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
       generateQuestions: reversed ? generateReversePinQuestions : generatePinQuestions,
       onAnswer: (q: QuizQuestion<Country>, correct: boolean) => {
         recordAnswer(q.subject.id, "pin-the-map", correct);
+        if (correct) {
+          setAnsweredCorrect((prev) => [...prev, q.subject.id]);
+        }
       },
       onComplete: () => {
         completeQuiz();
@@ -136,6 +142,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         setCorrectId(null);
         setWrongId(null);
         setZoomTarget(null);
+        setAnsweredCorrect([]);
         quizRef.current.startQuiz(regionPool, count, optionCount);
       });
     },
@@ -282,7 +289,10 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
             <div className="flex-1 relative min-h-0">
               <WorldMap
                 interactive={!reversed}
-                highlightedCountries={reversed ? [q.subject.id] : []}
+                highlightedCountries={[
+                  ...answeredCorrect,
+                  ...(reversed ? [q.subject.id] : []),
+                ]}
                 selectedCountry={null}
                 correctCountry={correctId}
                 wrongCountry={wrongId}

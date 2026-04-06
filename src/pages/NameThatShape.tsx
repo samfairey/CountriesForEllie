@@ -17,7 +17,6 @@ import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
 import { ProgressBar } from "../components/common/ProgressBar";
 import { CountryOutline } from "../components/quiz/CountryOutline";
-import { WorldMap } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
@@ -92,9 +91,6 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
   const reversedRef = useRef(false);
   const difficultyRef = useRef<Difficulty>("easy");
 
-  // Track correctly answered country IDs for the world map
-  const [correctCountries, setCorrectCountries] = useState<string[]>([]);
-
   useEffect(() => {
     preloadGeoJson();
   }, []);
@@ -115,9 +111,6 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
         },
       onAnswer: (q: QuizQuestion<Country>, correct: boolean) => {
         recordAnswer(q.subject.id, "name-that-shape", correct);
-        if (correct) {
-          setCorrectCountries((prev) => [...prev, q.subject.id]);
-        }
       },
       onComplete: () => {
         completeQuiz();
@@ -139,7 +132,6 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
       setDifficulty(diff);
       setReversed(rev);
       lastRegion.current = region;
-      setCorrectCountries([]);
       setLoading(true);
 
       const geo = await loadGeoJson();
@@ -295,25 +287,6 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
     );
   };
 
-  // World map showing correctly answered countries
-  const renderWorldMap = () => {
-    if (correctCountries.length === 0) return null;
-    return (
-      <div className="h-28 sm:h-36 w-full rounded-xl overflow-hidden border border-navy-lighter mb-3 relative">
-        <WorldMap
-          interactive={false}
-          highlightedCountries={correctCountries}
-          showBorders
-          cleanMap
-          className="absolute inset-0"
-        />
-        <div className="absolute bottom-1 right-2 text-xs text-slate-500 bg-navy/80 px-1.5 py-0.5 rounded">
-          {correctCountries.length} ✓
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div>
       <AnimatePresence mode="wait">
@@ -347,8 +320,8 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.25 }}
-                className="flex flex-col max-w-2xl mx-auto"
-                style={{ height: "calc(100vh - 3.5rem)" }}
+                className="flex flex-col justify-end max-w-2xl mx-auto"
+                style={{ minHeight: "calc(100vh - 3.5rem)" }}
               >
                 <div className="px-4 pt-4">
                   <ProgressBar
@@ -358,18 +331,12 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                   />
                 </div>
 
-                {/* World map strip */}
-                <div className="px-4 mt-3">
-                  {renderWorldMap()}
-                </div>
-
                 {/* Country name prompt - compact */}
-                <div className="px-4 py-2 flex-shrink-0">
+                <div className="px-4 py-3 flex-shrink-0">
                   {renderReversePrompt()}
                 </div>
 
                 {/* Shape options pinned to bottom */}
-                <div className="flex-1" />
                 <div className="px-4 pb-4">
                   {renderReverseShapeOptions()}
 
@@ -396,10 +363,6 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
               </motion.div>
             ) : (
               <div>
-                {/* World map for standard mode */}
-                <div className="max-w-2xl mx-auto px-4 mt-4">
-                  {renderWorldMap()}
-                </div>
                 <QuizQuestionView
                   key={`q-${quiz.currentIndex}`}
                   prompt={renderStandardPrompt()}

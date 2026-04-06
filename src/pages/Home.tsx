@@ -1,19 +1,27 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { GameModeCard } from "../components/common/GameModeCard";
+import { Link, useNavigate } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
 import { useAchievements } from "../hooks/useAchievements";
+import { useSettings, type DefaultDifficulty } from "../hooks/useSettings";
 import { getHighScore } from "../types/blitz";
+import type { Region } from "../types/country";
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07 } },
+  show: { transition: { staggerChildren: 0.05 } },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0 },
 };
+
+const REGIONS: (Region | "All")[] = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"];
+const DIFFICULTIES: { value: DefaultDifficulty; label: string; desc: string }[] = [
+  { value: "easy", label: "Easy", desc: "4 choices" },
+  { value: "medium", label: "Medium", desc: "6 choices" },
+  { value: "hard", label: "Hard", desc: "Type it" },
+];
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -34,61 +42,37 @@ function countMastered(countryStats: Record<string, { timesSeen: number; timesCo
   return mastered.size;
 }
 
-/** Animated spinning globe SVG for the hero section */
-function GlobeAnimation() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="mb-4"
-    >
-      <div className="relative w-20 h-20 mx-auto">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="w-20 h-20 rounded-full border-2 border-sky/30 flex items-center justify-center"
-          style={{
-            background:
-              "radial-gradient(circle at 35% 35%, #1e293b 0%, #0f172a 70%)",
-            boxShadow: "0 0 40px rgba(14, 165, 233, 0.15), inset 0 0 20px rgba(14, 165, 233, 0.1)",
-          }}
-        >
-          <span className="text-4xl select-none" role="img" aria-label="Globe">
-            🌍
-          </span>
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
-
 export function Home() {
   const { progress } = useProgress();
   const { unlockedIds, totalAchievements } = useAchievements();
+  const { settings, update } = useSettings();
+  const navigate = useNavigate();
   const blitzHigh = getHighScore(180);
   const mastered = countMastered(progress.countryStats);
 
+  const region = settings.defaultRegion;
+  const difficulty = settings.defaultDifficulty;
+
+  const setRegion = (r: Region | "All") => update({ defaultRegion: r });
+  const setDifficulty = (d: DefaultDifficulty) => update({ defaultDifficulty: d });
+
+  const play = (path: string) => navigate(`${path}?autostart=1`);
+
   return (
-    <div>
-      {/* Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-6"
-      >
-        <GlobeAnimation />
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-1">
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {/* Hero — compact */}
+      <motion.div variants={item} className="text-center mb-5">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-0.5">
           {getGreeting()}
         </h1>
         {progress.currentStreak > 0 && (
-          <motion.p
-            animate={{ scale: [1, 1.02, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-gold text-sm font-medium"
-          >
+          <p className="text-gold text-sm font-medium">
             🔥 {progress.currentStreak} day streak — keep it going!
-          </motion.p>
+          </p>
         )}
         {progress.currentStreak === 0 && progress.totalQuizzesCompleted > 0 && (
           <p className="text-slate-400 text-sm">
@@ -97,17 +81,15 @@ export function Home() {
         )}
         {progress.totalQuizzesCompleted === 0 && (
           <p className="text-slate-400 text-sm">
-            Master flags, capitals, and geography through fun quizzes.
+            Pick a region and difficulty, then jump in!
           </p>
         )}
       </motion.div>
 
       {/* Quick stats strip */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="flex items-center justify-center gap-3 sm:gap-5 mb-8 overflow-x-auto pb-1"
+        variants={item}
+        className="flex items-center justify-center gap-2.5 sm:gap-4 mb-6 overflow-x-auto pb-1"
       >
         <StatPill label="Mastered" value={`${mastered}/195`} icon="⭐" />
         <StatPill label="Streak" value={`${progress.currentStreak}`} icon="🔥" />
@@ -120,67 +102,123 @@ export function Home() {
         <StatPill label="Quizzes" value={`${progress.totalQuizzesCompleted}`} icon="✅" />
       </motion.div>
 
-      {/* Game modes grid */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-      >
-        <motion.div variants={item}>
-          <GameModeCard
-            icon="🏴"
-            title="Flag Quiz"
-            description="Identify countries by their flags"
-            to="/flag-quiz"
-            enabled
-          />
-        </motion.div>
-        <motion.div variants={item}>
-          <GameModeCard
-            icon="🏛️"
-            title="Capital Quiz"
-            description="Match countries with their capitals"
-            to="/capital-quiz"
-            enabled
-          />
-        </motion.div>
-        <motion.div variants={item}>
-          <GameModeCard
-            icon="📍"
-            title="Pin the Map"
-            description="Locate countries on an interactive map"
-            to="/pin-the-map"
-            enabled
-          />
-        </motion.div>
-        <motion.div variants={item}>
-          <GameModeCard
-            icon="🗺️"
-            title="Name that Shape"
-            description="Recognise countries by their outline"
-            to="/name-that-shape"
-            enabled
-          />
-        </motion.div>
-        <motion.div variants={item} className="sm:col-span-2 lg:col-span-1">
-          <GameModeCard
-            icon="⚡"
-            title="Blitz Mode"
-            description="Race the clock with mixed questions"
-            to="/blitz"
-            enabled
-            variant="blitz"
-          />
-        </motion.div>
+      {/* Region selector */}
+      <motion.div variants={item} className="mb-4">
+        <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
+          Region
+        </label>
+        <div className="flex flex-wrap gap-1.5">
+          {REGIONS.map((r) => (
+            <button
+              key={r}
+              onClick={() => setRegion(r)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                region === r
+                  ? "bg-sky text-white shadow-lg shadow-sky/25"
+                  : "bg-navy-lighter text-slate-300 hover:bg-navy-lighter/80"
+              }`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
       </motion.div>
-    </div>
+
+      {/* Difficulty selector */}
+      <motion.div variants={item} className="mb-6">
+        <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
+          Difficulty
+        </label>
+        <div className="flex gap-2">
+          {DIFFICULTIES.map((d) => (
+            <button
+              key={d.value}
+              onClick={() => setDifficulty(d.value)}
+              className={`flex-1 py-2 px-2 rounded-xl text-center transition-all border ${
+                difficulty === d.value
+                  ? "bg-sky/10 border-sky text-white"
+                  : "bg-navy-light border-navy-lighter text-slate-300 hover:border-slate-500"
+              }`}
+            >
+              <div className="font-semibold text-sm">{d.label}</div>
+              <div className="text-xs text-slate-400">{d.desc}</div>
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Main quiz modes — 3 across */}
+      <motion.div variants={item} className="grid grid-cols-3 gap-2.5 mb-4">
+        <QuizButton
+          icon="🏴"
+          label="Flag Quiz"
+          onClick={() => play("/flag-quiz")}
+        />
+        <QuizButton
+          icon="🏛️"
+          label="Capital Quiz"
+          onClick={() => play("/capital-quiz")}
+        />
+        <QuizButton
+          icon="🗺️"
+          label="Name that Shape"
+          onClick={() => play("/name-that-shape")}
+        />
+      </motion.div>
+
+      {/* Pin the Map — standalone */}
+      <motion.div variants={item} className="mb-4">
+        <button
+          onClick={() => play("/pin-the-map")}
+          className="w-full rounded-2xl p-4 border bg-gradient-to-r from-navy-light to-navy-light/70 border-navy-lighter hover:border-sky/50 hover:shadow-lg hover:shadow-sky/5 transition-all text-left flex items-center gap-4"
+        >
+          <span className="text-3xl" role="img" aria-hidden="true">📍</span>
+          <div className="flex-1 min-w-0">
+            <div className="text-white font-semibold text-sm">Pin the Map</div>
+            <div className="text-slate-400 text-xs">Find countries on the map — borders only</div>
+          </div>
+          <span className="px-3 py-1 bg-sky hover:bg-sky-dark text-white text-sm font-medium rounded-full shrink-0 transition-colors">
+            Play
+          </span>
+        </button>
+      </motion.div>
+
+      {/* Blitz Mode — standalone */}
+      <motion.div variants={item}>
+        <Link to="/blitz" className="no-underline block">
+          <div className="w-full rounded-2xl p-4 border bg-gradient-to-r from-amber-500/10 via-navy-light to-orange-500/5 border-amber-500/40 hover:border-amber-500/70 hover:shadow-lg hover:shadow-amber-500/5 transition-all text-left flex items-center gap-4">
+            <span className="text-3xl" role="img" aria-hidden="true">⚡</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-white font-semibold text-sm">Blitz Mode</div>
+              <div className="text-slate-400 text-xs">Race the clock with mixed questions</div>
+            </div>
+            <span className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-full shrink-0 transition-colors">
+              Play
+            </span>
+          </div>
+        </Link>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function QuizButton({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.03, y: -2 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      className="rounded-2xl p-4 border bg-gradient-to-br from-navy-light to-navy-light/70 border-navy-lighter hover:border-sky/50 hover:shadow-lg hover:shadow-sky/5 transition-all flex flex-col items-center gap-2 text-center"
+    >
+      <span className="text-2xl sm:text-3xl" role="img" aria-hidden="true">{icon}</span>
+      <span className="text-white font-semibold text-xs sm:text-sm leading-tight">{label}</span>
+    </motion.button>
   );
 }
 
 function StatPill({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-navy-light/60 border border-navy-lighter/50 rounded-full shrink-0">
+    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-navy-light/60 border border-navy-lighter/50 rounded-full shrink-0">
       <span className="text-sm">{icon}</span>
       <span className="text-white font-semibold text-sm">{value}</span>
       <span className="text-slate-500 text-xs hidden sm:inline">{label}</span>

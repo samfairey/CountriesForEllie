@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -8,6 +9,7 @@ import { useProgress } from "../hooks/useProgress";
 import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
+import { getSettings } from "../hooks/useSettings";
 import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
@@ -71,6 +73,8 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [preloading, setPreloading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const autoStarted = useRef(false);
 
   const config = useMemo(
     () => ({
@@ -139,6 +143,18 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
     },
     []
   );
+
+  // Auto-start from home page
+  useEffect(() => {
+    if (autoStarted.current) return;
+    if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
+      autoStarted.current = true;
+      setSearchParams({}, { replace: true });
+      const saved = getSettings();
+      const diff = saved.defaultDifficulty as Difficulty;
+      handleStart(saved.defaultRegion, diff, false);
+    }
+  }, [searchParams, quiz.phase, handleStart, setSearchParams]);
 
   const renderPrompt = (q: QuizQuestion<Country>) => {
     if (reversed) {

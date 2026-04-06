@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -10,6 +11,7 @@ import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
 import { loadGeoJson, getCountryFeature, preloadGeoJson } from "../utils/geoData";
+import { getSettings } from "../hooks/useSettings";
 import { QuizSetup, type Difficulty, type DifficultyOption } from "../components/quiz/QuizSetup";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
@@ -80,6 +82,8 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
   const [loading, setLoading] = useState(false);
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
   const geoDataRef = useRef<FeatureCollection | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const autoStarted = useRef(false);
 
   useEffect(() => {
     preloadGeoJson();
@@ -128,6 +132,18 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
     },
     []
   );
+
+  // Auto-start from home page
+  useEffect(() => {
+    if (autoStarted.current) return;
+    if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
+      autoStarted.current = true;
+      setSearchParams({}, { replace: true });
+      const saved = getSettings();
+      const diff = saved.defaultDifficulty as Difficulty;
+      handleStart(saved.defaultRegion, diff, false);
+    }
+  }, [searchParams, quiz.phase, handleStart, setSearchParams]);
 
   const getGeometry = (countryId: string): Geometry | null => {
     const data = geoData ?? geoDataRef.current;

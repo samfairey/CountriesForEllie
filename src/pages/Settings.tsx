@@ -1,16 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import type { Region } from "../types/country";
-import { useSettings, type DefaultDifficulty } from "../hooks/useSettings";
+import { useSettings } from "../hooks/useSettings";
 import { setSoundEnabled } from "../utils/sounds";
-
-const REGIONS: (Region | "All")[] = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"];
-const DIFFICULTIES: { value: DefaultDifficulty; label: string }[] = [
-  { value: "easy", label: "Easy" },
-  { value: "medium", label: "Medium" },
-  { value: "hard", label: "Hard" },
-];
 
 export function Settings() {
   const { settings, update, resetProgress } = useSettings();
@@ -53,46 +45,6 @@ export function Settings() {
                 }`}
               />
             </button>
-          </div>
-        </div>
-
-        {/* Default Difficulty */}
-        <div className="bg-navy-light border border-navy-lighter rounded-xl p-4">
-          <div className="text-white font-medium mb-3">Default Difficulty</div>
-          <div className="flex rounded-full bg-navy-lighter p-1">
-            {DIFFICULTIES.map((d) => (
-              <button
-                key={d.value}
-                onClick={() => update({ defaultDifficulty: d.value })}
-                className={`flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all ${
-                  settings.defaultDifficulty === d.value
-                    ? "bg-sky text-white shadow-md"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Default Region */}
-        <div className="bg-navy-light border border-navy-lighter rounded-xl p-4">
-          <div className="text-white font-medium mb-3">Default Region</div>
-          <div className="flex flex-wrap gap-2">
-            {REGIONS.map((r) => (
-              <button
-                key={r}
-                onClick={() => update({ defaultRegion: r })}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  settings.defaultRegion === r
-                    ? "bg-sky text-white shadow-md"
-                    : "bg-navy-lighter text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {r}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -172,7 +124,7 @@ export function Settings() {
         to="/"
         className="block text-center mt-8 text-slate-400 hover:text-white transition-colors text-sm no-underline"
       >
-        ← Back to Home
+        &larr; Back to Home
       </Link>
     </motion.div>
   );

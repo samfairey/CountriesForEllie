@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
@@ -9,19 +10,15 @@ import { useProgress } from "../hooks/useProgress";
 import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { shuffle } from "../utils/shuffle";
 import { preloadGeoJson } from "../utils/geoData";
-import { QuizSetup, type Difficulty, type DifficultyOption } from "../components/quiz/QuizSetup";
+import { getSettings } from "../hooks/useSettings";
+import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
 import { ProgressBar } from "../components/common/ProgressBar";
 import { QuizResults } from "../components/quiz/QuizResults";
-import { WorldMap, type CapitalMarker } from "../components/map/WorldMap";
+import { WorldMap } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
 const QUESTIONS_PER_ROUND = 20;
-
-const PIN_DIFFICULTIES: DifficultyOption[] = [
-  { value: "easy", label: "Easy", desc: "Borders + capitals" },
-  { value: "medium", label: "Medium", desc: "Borders only" },
-];
 
 const REGION_BOUNDS: Record<Region | "All", LatLngBoundsExpression> = {
   All: [[-60, -170], [75, 180]],
@@ -71,11 +68,12 @@ function generateReversePinQuestions(
 export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
   const { recordAnswer, completeQuiz, progress } = useProgress();
   const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState<Region | "All">("All");
   const [pool, setPool] = useState<Country[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const autoStarted = useRef(false);
 
   // Map feedback state
   const [correctId, setCorrectId] = useState<string | null>(null);
@@ -107,9 +105,8 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   const quizRef = useRef(quiz);
   quizRef.current = quiz;
 
-  const handleStart = useCallback(
-    (selectedRegion: Region | "All", diff: Difficulty, rev: boolean) => {
-      setDifficulty(diff);
+  const startGame = useCallback(
+    (selectedRegion: Region | "All", rev: boolean) => {
       setReversed(rev);
       setRegion(selectedRegion);
       setLoading(true);
@@ -118,7 +115,8 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         selectedRegion === "All" ? countries : countries.filter((c) => c.region === selectedRegion);
       setPool(regionPool);
       const count = Math.min(QUESTIONS_PER_ROUND, regionPool.length);
-      const optionCount = diff === "easy" ? 4 : 6;
+      // Always medium: 6 options for reverse MC
+      const optionCount = 6;
 
       // Preload flag images
       const preloadPromises = shuffle(regionPool)
@@ -143,6 +141,25 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
     },
     []
   );
+
+  // Adapter for QuizSetup's onStart signature (region, difficulty, reversed)
+  const handleStart = useCallback(
+    (selectedRegion: Region | "All", _diff: Difficulty, rev: boolean) => {
+      startGame(selectedRegion, rev);
+    },
+    [startGame]
+  );
+
+  // Auto-start from home page
+  useEffect(() => {
+    if (autoStarted.current) return;
+    if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
+      autoStarted.current = true;
+      setSearchParams({}, { replace: true });
+      const saved = getSettings();
+      startGame(saved.defaultRegion, false);
+    }
+  }, [searchParams, quiz.phase, startGame, setSearchParams]);
 
   const handleMapClick = useCallback(
     (countryId: string) => {
@@ -194,12 +211,6 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
   const q = quiz.currentQuestion;
 
-  // Build capital markers for easy mode
-  const capitals: CapitalMarker[] = useMemo(() => {
-    if (difficulty !== "easy" || pool.length === 0) return [];
-    return pool.map((c) => ({ lat: c.lat, lng: c.lng, name: c.capital }));
-  }, [difficulty, pool]);
-
   // Region bounds for initial zoom
   const initialBounds = useMemo(() => {
     if (region === "All") return null;
@@ -223,7 +234,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                 onStart={handleStart}
                 showReverse
                 reverseLabel={["Name → Map", "Map → Name"]}
-                difficulties={PIN_DIFFICULTIES}
+                difficulties={[{ value: "medium", label: "Medium", desc: "Borders only" }]}
               />
             )}
           </div>
@@ -273,7 +284,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                   zoomTarget || (reversed ? q.subject.id : null)
                 }
                 showBorders
-                capitals={capitals}
+                capitals={[]}
                 initialBounds={initialBounds}
                 cleanMap
                 correctAsHighlight

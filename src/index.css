@@ -12,6 +12,7 @@
   --color-sky: #0ea5e9;
   --color-sky-dark: #0284c7;
   --color-gold: #f59e0b;
+  --color-violet: #8b5cf6;
 }
 
 body {
@@ -29,8 +30,52 @@ body {
   flex-direction: column;
 }
 
+/* Focus rings — accessible and visible on dark backgrounds */
 *:focus-visible {
   outline: 2px solid var(--color-sky);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Minimum touch target for interactive elements on mobile */
+@media (pointer: coarse) {
+  button,
+  a,
+  [role="button"],
+  [role="switch"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Flag images fade in on load */
+img[src*="flagcdn"] {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection colour */
+::selection {
+  background-color: rgba(14, 165, 233, 0.3);
+  color: white;
 }

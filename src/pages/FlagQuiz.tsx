@@ -5,11 +5,13 @@ import type { Country, Region } from "../types/country";
 import type { QuizQuestion } from "../hooks/useQuiz";
 import { useQuiz } from "../hooks/useQuiz";
 import { useProgress } from "../hooks/useProgress";
+import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
 import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
+import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
 const QUESTIONS_PER_ROUND = 20;
@@ -55,16 +57,9 @@ function generateReverseFlagQuestions(
 
   return questionCountries.map((country) => {
     if (optionCount === 0) {
-      // Hard mode: show country name, user describes the flag — not practical.
-      // In reverse hard mode, we still show the country name and user can't type a flag.
-      // So reverse hard = show country name, pick the correct flag from... not feasible for text.
-      // We'll keep it as: show country name, no options (but this mode doesn't make sense for flags).
-      // Fallback: just do standard hard mode for flags.
       return { subject: country, correctAnswer: country.name, options: [] };
     }
 
-    // Reverse: show country name → pick the correct flag
-    // Options are country IDs (we'll render them as flags in the prompt)
     const sameRegion = pool.filter(
       (c) => c.id !== country.id && c.region === country.region && !usedAsWrong.has(c.id)
     );
@@ -83,11 +78,11 @@ function generateReverseFlagQuestions(
   });
 }
 
-// Lookup map for reverse mode flag rendering
 const countryById = new Map(countries.map((c) => [c.id, c]));
 
-export function FlagQuiz() {
-  const { recordAnswer, completeQuiz } = useProgress();
+export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
+  const { recordAnswer, completeQuiz, progress } = useProgress();
+  const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [preloading, setPreloading] = useState(false);
@@ -105,12 +100,30 @@ export function FlagQuiz() {
       },
       onComplete: () => {
         completeQuiz();
+        updateChallengeFlags({ modesPlayed: ["flag-quiz"] });
       },
     }),
-    [difficulty, reversed, recordAnswer, completeQuiz]
+    [difficulty, reversed, recordAnswer, completeQuiz, updateChallengeFlags]
   );
 
   const quiz = useQuiz<Country>(config);
+
+  // Track challenge flags when quiz completes
+  const handleComplete = quiz.phase === "results";
+  useMemo(() => {
+    if (handleComplete && quiz.totalQuestions >= 20) {
+      if (quiz.score === quiz.totalQuestions) {
+        updateChallengeFlags({ hasPerfectQuiz: true });
+      }
+      const pct = (quiz.score / quiz.totalQuestions) * 100;
+      if (difficulty === "hard" && pct > 80) {
+        updateChallengeFlags({ hasHardMode80: true });
+      }
+      if (reversed && pct > 80) {
+        updateChallengeFlags({ hasReverse80: true });
+      }
+    }
+  }, [handleComplete]);
 
   const handleStart = useCallback(
     (region: Region | "All", diff: Difficulty, rev: boolean) => {
@@ -143,7 +156,6 @@ export function FlagQuiz() {
 
   const renderPrompt = (q: QuizQuestion<Country>) => {
     if (reversed) {
-      // Show country name, user picks the flag
       return (
         <div className="text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white">
@@ -153,7 +165,6 @@ export function FlagQuiz() {
         </div>
       );
     }
-    // Standard: show flag, user picks country name
     return (
       <img
         src={q.subject.flagSvgUrl}

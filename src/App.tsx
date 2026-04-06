@@ -1,16 +1,26 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { lazy, Suspense, useState, useCallback } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Shell } from "./components/layout/Shell";
 import { Home } from "./pages/Home";
 import { FlagQuiz } from "./pages/FlagQuiz";
 import { CapitalQuiz } from "./pages/CapitalQuiz";
+import { Settings } from "./pages/Settings";
+import { Achievements } from "./pages/Achievements";
+import { Welcome } from "./pages/Welcome";
+import { KeyboardShortcuts } from "./components/common/KeyboardShortcuts";
+import { AchievementToast } from "./components/common/AchievementToast";
+import { hasOnboarded } from "./hooks/useSettings";
+import type { Achievement } from "./data/achievements";
 
-// Lazy load map-heavy pages to avoid bundling leaflet + GeoJSON on initial load
+// Lazy load map-heavy pages
 const PinTheMap = lazy(() =>
   import("./pages/PinTheMap").then((m) => ({ default: m.PinTheMap }))
 );
 const NameThatShape = lazy(() =>
   import("./pages/NameThatShape").then((m) => ({ default: m.NameThatShape }))
+);
+const BlitzMode = lazy(() =>
+  import("./pages/BlitzMode").then((m) => ({ default: m.BlitzMode }))
 );
 
 function LoadingFallback() {
@@ -23,18 +33,39 @@ function LoadingFallback() {
 }
 
 export default function App() {
+  const [toastAchievements, setToastAchievements] = useState<Achievement[]>([]);
+
+  const showAchievementToast = useCallback((achievements: Achievement[]) => {
+    if (achievements.length > 0) {
+      setToastAchievements(achievements);
+    }
+  }, []);
+
+  const onboarded = hasOnboarded();
+
   return (
     <BrowserRouter>
+      <KeyboardShortcuts />
+      <AchievementToast
+        achievements={toastAchievements}
+        onDismiss={() => setToastAchievements([])}
+      />
       <Routes>
+        <Route path="/welcome" element={<Welcome />} />
         <Route element={<Shell />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/flag-quiz" element={<FlagQuiz />} />
-          <Route path="/capital-quiz" element={<CapitalQuiz />} />
+          <Route
+            path="/"
+            element={onboarded ? <Home /> : <Navigate to="/welcome" replace />}
+          />
+          <Route path="/flag-quiz" element={<FlagQuiz onAchievements={showAchievementToast} />} />
+          <Route path="/capital-quiz" element={<CapitalQuiz onAchievements={showAchievementToast} />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/achievements" element={<Achievements />} />
           <Route
             path="/pin-the-map"
             element={
               <Suspense fallback={<LoadingFallback />}>
-                <PinTheMap />
+                <PinTheMap onAchievements={showAchievementToast} />
               </Suspense>
             }
           />
@@ -42,7 +73,15 @@ export default function App() {
             path="/name-that-shape"
             element={
               <Suspense fallback={<LoadingFallback />}>
-                <NameThatShape />
+                <NameThatShape onAchievements={showAchievementToast} />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/blitz"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <BlitzMode onAchievements={showAchievementToast} />
               </Suspense>
             }
           />

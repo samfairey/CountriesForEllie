@@ -5,12 +5,14 @@ import type { Country, Region } from "../types/country";
 import type { QuizQuestion } from "../hooks/useQuiz";
 import { useQuiz } from "../hooks/useQuiz";
 import { useProgress } from "../hooks/useProgress";
+import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { shuffle } from "../utils/shuffle";
 import { preloadGeoJson } from "../utils/geoData";
 import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
 import { ProgressBar } from "../components/common/ProgressBar";
 import { QuizResults } from "../components/quiz/QuizResults";
 import { WorldMap } from "../components/map/WorldMap";
+import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
 const QUESTIONS_PER_ROUND = 20;
@@ -58,8 +60,9 @@ function generateReversePinQuestions(
   });
 }
 
-export function PinTheMap() {
-  const { recordAnswer, completeQuiz } = useProgress();
+export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
+  const { recordAnswer, completeQuiz, progress } = useProgress();
+  const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -82,6 +85,7 @@ export function PinTheMap() {
       },
       onComplete: () => {
         completeQuiz();
+        updateChallengeFlags({ modesPlayed: ["pin-the-map"] });
       },
     }),
     [reversed, recordAnswer, completeQuiz]

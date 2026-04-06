@@ -14,7 +14,7 @@ import * as turf from "@turf/turf";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(__dirname, "../public/countries.geo.json");
 const SRC_URL =
-  "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson";
+  "https://r2.datahub.io/clvyjaryy0000la0cxieg4o8o/main/raw/data/countries.geojson";
 
 // ISO_A2 overrides for countries whose Natural-Earth property is "-99" or wrong
 const ISO_OVERRIDES = {
@@ -22,6 +22,7 @@ const ISO_OVERRIDES = {
   Norway: "NO",
   Kosovo: "XK", // not a UN member but included in many datasets
   "N. Cyprus": "XX", // will be filtered out
+  "Northern Cyprus": "XX",
   Somaliland: "XX",
   "W. Sahara": "EH",
   "S. Sudan": "SS",

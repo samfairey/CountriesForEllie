@@ -6,6 +6,7 @@ import type { QuizQuestion } from "../hooks/useQuiz";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useQuiz } from "../hooks/useQuiz";
 import { useProgress } from "../hooks/useProgress";
+import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
 import { loadGeoJson, getCountryFeature, preloadGeoJson } from "../utils/geoData";
@@ -14,6 +15,7 @@ import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
 import { ProgressBar } from "../components/common/ProgressBar";
 import { CountryOutline } from "../components/quiz/CountryOutline";
+import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
 const QUESTIONS_PER_ROUND = 20;
@@ -80,8 +82,9 @@ function generateReverseShapeQuestions(
 
 const countryById = new Map(countries.map((c) => [c.id, c]));
 
-export function NameThatShape() {
-  const { recordAnswer, completeQuiz } = useProgress();
+export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
+  const { recordAnswer, completeQuiz, progress } = useProgress();
+  const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -104,6 +107,7 @@ export function NameThatShape() {
       },
       onComplete: () => {
         completeQuiz();
+        updateChallengeFlags({ modesPlayed: ["name-that-shape"] });
       },
     }),
     [difficulty, reversed, recordAnswer, completeQuiz]

@@ -82,6 +82,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   const [wrongId, setWrongId] = useState<string | null>(null);
   const [zoomTarget, setZoomTarget] = useState<string | null>(null);
   const [flyBackKey, setFlyBackKey] = useState(0);
+  const pendingAnswer = useRef(false);
 
   // Preload GeoJSON on mount
   useEffect(() => {
@@ -145,7 +146,8 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
   const handleMapClick = useCallback(
     (countryId: string) => {
-      if (!quiz.currentQuestion || quiz.lastAnswerCorrect !== null || reversed) return;
+      if (!quiz.currentQuestion || pendingAnswer.current || quiz.lastAnswerCorrect !== null || reversed) return;
+      pendingAnswer.current = true;
 
       const correct = countryId === quiz.currentQuestion.correctAnswer;
       if (correct) {
@@ -157,11 +159,11 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         setZoomTarget(quiz.currentQuestion.correctAnswer);
       }
 
-      quiz.submitAnswer(countryId);
-
-      // Reset map highlights and zoom back to region
-      const delay = correct ? 200 : 600;
+      // Show feedback on map, then submit answer and reset
+      const delay = correct ? 800 : 1800;
       setTimeout(() => {
+        pendingAnswer.current = false;
+        quiz.submitAnswer(countryId);
         setCorrectId(null);
         setWrongId(null);
         setZoomTarget(null);
@@ -279,18 +281,18 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
               {/* Feedback overlay for map-click mode */}
               <AnimatePresence>
-                {!reversed && quiz.lastAnswerCorrect !== null && (
+                {!reversed && (correctId || wrongId) && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     className={`absolute top-4 left-1/2 -translate-x-1/2 z-[1000] px-4 py-2 rounded-full font-semibold text-sm shadow-lg ${
-                      quiz.lastAnswerCorrect
+                      !wrongId
                         ? "bg-emerald text-white"
                         : "bg-rose text-white"
                     }`}
                   >
-                    {quiz.lastAnswerCorrect
+                    {!wrongId
                       ? "Correct!"
                       : `Wrong — it was ${q.subject.name}`}
                   </motion.div>

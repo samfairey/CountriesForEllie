@@ -12,7 +12,7 @@ import { fileURLToPath } from "url";
 import * as turf from "@turf/turf";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUT = resolve(__dirname, "../src/data/countries.geo.json");
+const OUT = resolve(__dirname, "../public/countries.geo.json");
 const SRC_URL =
   "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson";
 
@@ -41,11 +41,68 @@ const ISO_OVERRIDES = {
   "São Tomé and Principe": "ST",
 };
 
+/**
+ * Countries whose MultiPolygon contains distant overseas territories.
+ * For each, we define a bounding box [minLng, minLat, maxLng, maxLat] that
+ * covers only the main landmass. Any polygon whose centroid falls outside
+ * this box is stripped.
+ */
+const MAINLAND_BBOX = {
+  fr: [-5.5, 41.2, 9.7, 51.2],       // Metropolitan France
+  pt: [-10, 36.9, -6, 42.2],          // Continental Portugal (excludes Azores, Madeira)
+  es: [-9.4, 35.9, 4.4, 43.8],       // Peninsular Spain + Balearics (excludes Canary Is.)
+  no: [4, 57, 31.5, 71.5],            // Mainland Norway (excludes Svalbard, Jan Mayen)
+  nl: [3.3, 50.7, 7.3, 53.6],         // European Netherlands (excludes Caribbean)
+  dk: [7.5, 54.5, 15.5, 58],          // Denmark proper (excludes Greenland, Faroe Is.)
+  us: [-130, 24, -65, 50],            // Contiguous US (excludes Alaska, Hawaii, territories)
+  gb: [-8.7, 49.8, 2, 61],            // Great Britain + Northern Ireland (excludes overseas)
+  cl: [-76, -56, -66, -17],           // Continental Chile (excludes Easter Is., Juan Fernández)
+  ec: [-81.1, -5.1, -75, 1.5],       // Continental Ecuador (excludes Galápagos)
+  in: [68, 6, 97.5, 37],              // Mainland India (excludes Andaman/Nicobar)
+  jp: [127, 30, 146, 46],             // Main Japanese islands
+  my: [99, 0.8, 119.5, 7.5],          // Peninsular + Borneo Malaysia
+  nz: [165, -48, 179, -34],           // Main NZ islands
+  au: [112, -44, 154, -10],           // Mainland Australia + Tasmania
+  ru: [27, 41, 190, 82],              // Russia (wide enough for Far East)
+};
+
 // Load our country IDs for filtering
 const countriesJson = JSON.parse(
   readFileSync(resolve(__dirname, "../src/data/countries.json"), "utf8")
 );
 const validIds = new Set(countriesJson.map((c) => c.id));
+
+/** Compute centroid of a single polygon ring set */
+function polygonCentroid(coords) {
+  let sumLng = 0, sumLat = 0, count = 0;
+  for (const ring of coords) {
+    for (const [lng, lat] of ring) {
+      sumLng += lng;
+      sumLat += lat;
+      count++;
+    }
+  }
+  return count > 0 ? [sumLng / count, sumLat / count] : [0, 0];
+}
+
+/** Strip overseas territory polygons from a MultiPolygon */
+function stripOverseas(geometry, iso) {
+  const bbox = MAINLAND_BBOX[iso];
+  if (!bbox) return geometry;
+  if (geometry.type !== "MultiPolygon") return geometry;
+
+  const [bMinLng, bMinLat, bMaxLng, bMaxLat] = bbox;
+  const kept = geometry.coordinates.filter((polygonCoords) => {
+    const [cLng, cLat] = polygonCentroid(polygonCoords);
+    return cLng >= bMinLng && cLng <= bMaxLng && cLat >= bMinLat && cLat <= bMaxLat;
+  });
+
+  if (kept.length === 0) return geometry; // safety: don't remove everything
+  if (kept.length === 1) {
+    return { type: "Polygon", coordinates: kept[0] };
+  }
+  return { type: "MultiPolygon", coordinates: kept };
+}
 
 async function main() {
   console.log("Fetching GeoJSON from GitHub...");
@@ -84,10 +141,12 @@ async function main() {
       simplified = feature;
     }
 
+    const finalGeometry = stripOverseas(simplified.geometry, iso);
+
     kept.push({
       type: "Feature",
       properties: { ISO_A2: iso },
-      geometry: simplified.geometry,
+      geometry: finalGeometry,
     });
   }
 

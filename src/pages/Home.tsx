@@ -135,12 +135,12 @@ export function Home() {
         <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
           Region
         </label>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none">
           {REGIONS.map((r) => (
             <button
               key={r}
               onClick={() => setRegion(r)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all shrink-0 ${
                 region === r
                   ? "bg-sky text-white shadow-lg shadow-sky/25"
                   : "bg-navy-lighter text-slate-300 hover:bg-navy-lighter/80"

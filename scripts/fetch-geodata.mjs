@@ -65,6 +65,7 @@ const MAINLAND_BBOX = {
   nz: [165, -48, 179, -34],           // Main NZ islands
   au: [112, -44, 154, -10],           // Mainland Australia + Tasmania
   ru: [27, 41, 190, 82],              // Russia (wide enough for Far East)
+  za: [16, -35, 33, -22],             // Mainland South Africa (excludes Prince Edward Is.)
 };
 
 // Load our country IDs for filtering
@@ -138,27 +139,38 @@ async function main() {
     const bboxHeight = bbox[3] - bbox[1];
     const bboxSpan = Math.max(bboxWidth, bboxHeight);
 
+    // Count source points to decide whether to simplify
+    let srcPoints = 0;
+    const countPts = (coords) => {
+      if (typeof coords[0] === "number") { srcPoints++; return; }
+      coords.forEach(countPts);
+    };
+    countPts(feature.geometry.coordinates);
+
     let tolerance;
-    if (bboxSpan < 0.5) {
-      tolerance = 0.0005; // micro states (Andorra, Monaco, Liechtenstein, Singapore, etc.)
-    } else if (bboxSpan < 2) {
-      tolerance = 0.002;  // small countries (Luxembourg, Brunei, etc.)
+    if (bboxSpan < 2) {
+      tolerance = 0;      // small countries — keep all source detail
     } else if (bboxSpan < 5) {
-      tolerance = 0.005;  // medium-small (Belgium, Netherlands, etc.)
+      tolerance = 0.003;  // medium-small (Belgium, Netherlands, etc.)
     } else if (bboxSpan < 15) {
-      tolerance = 0.01;   // medium (Portugal, UK, etc.)
+      tolerance = 0.008;  // medium (Portugal, UK, etc.)
     } else {
-      tolerance = 0.015;  // large countries (Russia, Canada, etc.)
+      tolerance = 0.012;  // large countries (Russia, Canada, etc.)
     }
 
+    // Skip simplification for countries with few source points
     let simplified;
-    try {
-      simplified = turf.simplify(feature, {
-        tolerance,
-        highQuality: true,
-      });
-    } catch {
+    if (tolerance === 0 || srcPoints < 200) {
       simplified = feature;
+    } else {
+      try {
+        simplified = turf.simplify(feature, {
+          tolerance,
+          highQuality: true,
+        });
+      } catch {
+        simplified = feature;
+      }
     }
 
     const finalGeometry = stripOverseas(simplified.geometry, iso);

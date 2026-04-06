@@ -3,19 +3,35 @@ import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
 import type { QuizQuestion } from "../hooks/useQuiz";
+import type { LatLngBoundsExpression } from "leaflet";
 import { useQuiz } from "../hooks/useQuiz";
 import { useProgress } from "../hooks/useProgress";
 import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { shuffle } from "../utils/shuffle";
 import { preloadGeoJson } from "../utils/geoData";
-import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
+import { QuizSetup, type Difficulty, type DifficultyOption } from "../components/quiz/QuizSetup";
 import { ProgressBar } from "../components/common/ProgressBar";
 import { QuizResults } from "../components/quiz/QuizResults";
-import { WorldMap } from "../components/map/WorldMap";
+import { WorldMap, type CapitalMarker } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
 const QUESTIONS_PER_ROUND = 20;
+
+const PIN_DIFFICULTIES: DifficultyOption[] = [
+  { value: "easy", label: "Easy", desc: "Borders + capitals" },
+  { value: "medium", label: "Medium", desc: "Borders only" },
+];
+
+const REGION_BOUNDS: Record<Region | "All", LatLngBoundsExpression> = {
+  All: [[-60, -170], [75, 180]],
+  Africa: [[-35, -18], [37, 52]],
+  Americas: [[-56, -170], [72, -34]],
+  Asia: [[-10, 25], [55, 150]],
+  Europe: [[35, -25], [72, 45]],
+  Oceania: [[-48, 110], [15, 180]],
+  Antarctica: [[-90, -180], [-60, 180]],
+};
 
 /** Standard mode: show country name, user clicks on map */
 function generatePinQuestions(
@@ -58,11 +74,14 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [region, setRegion] = useState<Region | "All">("All");
+  const [pool, setPool] = useState<Country[]>([]);
 
   // Map feedback state
   const [correctId, setCorrectId] = useState<string | null>(null);
   const [wrongId, setWrongId] = useState<string | null>(null);
   const [zoomTarget, setZoomTarget] = useState<string | null>(null);
+  const [flyBackKey, setFlyBackKey] = useState(0);
 
   // Preload GeoJSON on mount
   useEffect(() => {
@@ -88,18 +107,20 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   quizRef.current = quiz;
 
   const handleStart = useCallback(
-    (region: Region | "All", diff: Difficulty, rev: boolean) => {
+    (selectedRegion: Region | "All", diff: Difficulty, rev: boolean) => {
       setDifficulty(diff);
       setReversed(rev);
+      setRegion(selectedRegion);
       setLoading(true);
 
-      const pool =
-        region === "All" ? countries : countries.filter((c) => c.region === region);
-      const count = Math.min(QUESTIONS_PER_ROUND, pool.length);
-      const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 4;
+      const regionPool =
+        selectedRegion === "All" ? countries : countries.filter((c) => c.region === selectedRegion);
+      setPool(regionPool);
+      const count = Math.min(QUESTIONS_PER_ROUND, regionPool.length);
+      const optionCount = diff === "easy" ? 4 : 6;
 
       // Preload flag images
-      const preloadPromises = shuffle(pool)
+      const preloadPromises = shuffle(regionPool)
         .slice(0, count)
         .map(
           (c) =>
@@ -116,7 +137,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         setCorrectId(null);
         setWrongId(null);
         setZoomTarget(null);
-        quizRef.current.startQuiz(pool, count, optionCount);
+        quizRef.current.startQuiz(regionPool, count, optionCount);
       });
     },
     []
@@ -138,12 +159,15 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
       quiz.submitAnswer(countryId);
 
-      // Reset map highlights after the quiz auto-advances
+      // Reset map highlights and zoom back to region
       const delay = correct ? 200 : 600;
       setTimeout(() => {
         setCorrectId(null);
         setWrongId(null);
         setZoomTarget(null);
+        if (!correct) {
+          setFlyBackKey((k) => k + 1);
+        }
       }, delay);
     },
     [quiz, reversed]
@@ -164,8 +188,19 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
     [quiz]
   );
 
-  const showBorders = difficulty !== "hard";
   const q = quiz.currentQuestion;
+
+  // Build capital markers for easy mode
+  const capitals: CapitalMarker[] = useMemo(() => {
+    if (difficulty !== "easy" || pool.length === 0) return [];
+    return pool.map((c) => ({ lat: c.lat, lng: c.lng, name: c.capital }));
+  }, [difficulty, pool]);
+
+  // Region bounds for initial zoom
+  const initialBounds = useMemo(() => {
+    if (region === "All") return null;
+    return REGION_BOUNDS[region];
+  }, [region]);
 
   return (
     <div className="flex flex-col" style={{ minHeight: "calc(100vh - 3.5rem)" }}>
@@ -184,6 +219,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                 onStart={handleStart}
                 showReverse
                 reverseLabel={["Name → Map", "Map → Name"]}
+                difficulties={PIN_DIFFICULTIES}
               />
             )}
           </div>
@@ -232,7 +268,12 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                   zoomTarget ||
                   (reversed && difficulty === "easy" ? q.subject.id : null)
                 }
-                showBorders={showBorders}
+                showBorders
+                capitals={capitals}
+                initialBounds={initialBounds}
+                cleanMap
+                correctAsHighlight
+                flyToBounds={flyBackKey > 0 ? { bounds: REGION_BOUNDS[region], key: flyBackKey } : null}
                 className="absolute inset-0"
               />
 

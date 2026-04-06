@@ -54,13 +54,13 @@ function generateShapeQuestions(
 function generateReverseShapeQuestions(
   pool: Country[],
   count: number,
-  _optionCount: number
+  optionCount: number
 ): QuizQuestion<Country>[] {
   const questionCountries = shuffle(pool).slice(0, count);
 
   return questionCountries.map((country) => {
     const others = pool.filter((c) => c.id !== country.id);
-    const wrongOptions = shuffle(others).slice(0, 3); // always 4 shape options
+    const wrongOptions = shuffle(others).slice(0, Math.max(optionCount - 1, 3));
 
     return {
       subject: country,

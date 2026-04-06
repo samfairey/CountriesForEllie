@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useRef } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
 import type { QuizQuestion } from "../hooks/useQuiz";
@@ -11,6 +11,7 @@ import { shuffle } from "../utils/shuffle";
 import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
+import { ProgressBar } from "../components/common/ProgressBar";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
@@ -161,20 +162,51 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
     );
   };
 
-  const renderOptionLabel = reversed
-    ? (optionId: string) => {
-        const c = countryById.get(optionId);
-        return c ? (
-          <img
-            src={c.flagSvgUrl}
-            alt="Flag option"
-            className="h-10 sm:h-12 w-auto object-contain rounded"
-          />
-        ) : (
-          optionId
-        );
-      }
-    : undefined;
+  const renderReverseFlagOptions = () => {
+    const q = quiz.currentQuestion;
+    if (!q) return null;
+    const answered = quiz.lastAnswerCorrect !== null;
+
+    return (
+      <div className="grid grid-cols-2 gap-3 max-w-xl mx-auto mt-6">
+        {q.options.map((optionId) => {
+          const c = countryById.get(optionId);
+          if (!c) return null;
+
+          let borderClass = "border-navy-lighter hover:border-sky/60";
+          if (answered) {
+            if (optionId === q.correctAnswer) {
+              borderClass = "border-emerald bg-emerald/10";
+            } else if (
+              optionId === quiz.selectedAnswer &&
+              !quiz.lastAnswerCorrect
+            ) {
+              borderClass = "border-rose bg-rose/10";
+            } else {
+              borderClass = "border-navy-lighter/50 opacity-40";
+            }
+          }
+
+          return (
+            <motion.button
+              key={optionId}
+              whileTap={!answered ? { scale: 0.97 } : undefined}
+              onClick={() => !answered && quiz.submitAnswer(optionId)}
+              disabled={answered}
+              className={`p-3 rounded-xl border bg-navy-light transition-all flex items-center justify-center ${borderClass}`}
+            >
+              <img
+                src={c.flagSvgUrl}
+                alt="Flag option"
+                className="h-16 sm:h-20 w-auto object-contain rounded shadow-sm"
+                draggable={false}
+              />
+            </motion.button>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -200,20 +232,58 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
         )}
 
         {quiz.phase === "playing" && quiz.currentQuestion && (
-          <QuizQuestionView
-            key={`q-${quiz.currentIndex}`}
-            prompt={renderPrompt(quiz.currentQuestion)}
-            correctAnswer={quiz.currentQuestion.correctAnswer}
-            options={quiz.currentQuestion.options}
-            currentIndex={quiz.currentIndex}
-            totalQuestions={quiz.totalQuestions}
-            onAnswer={quiz.submitAnswer}
-            lastAnswerCorrect={quiz.lastAnswerCorrect}
-            selectedAnswer={quiz.selectedAnswer}
-            isHardMode={!reversed && difficulty === "hard"}
-            inputPlaceholder="Type the country name..."
-            renderOptionLabel={renderOptionLabel}
-          />
+          reversed ? (
+            <motion.div
+              key={`q-${quiz.currentIndex}`}
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.25 }}
+              className="max-w-2xl mx-auto"
+            >
+              <ProgressBar
+                current={quiz.currentIndex + 1}
+                total={quiz.totalQuestions}
+              />
+              <div className="mt-6 rounded-2xl bg-navy-light border border-navy-lighter p-6 flex flex-col items-center">
+                {renderPrompt(quiz.currentQuestion)}
+              </div>
+              {renderReverseFlagOptions()}
+
+              <AnimatePresence>
+                {quiz.lastAnswerCorrect !== null && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className={`mt-4 p-3 rounded-xl text-center font-semibold ${
+                      quiz.lastAnswerCorrect
+                        ? "bg-emerald/15 text-emerald"
+                        : "bg-rose/15 text-rose"
+                    }`}
+                  >
+                    {quiz.lastAnswerCorrect
+                      ? "Correct!"
+                      : `Wrong — it was ${quiz.currentQuestion.subject.name}`}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ) : (
+            <QuizQuestionView
+              key={`q-${quiz.currentIndex}`}
+              prompt={renderPrompt(quiz.currentQuestion)}
+              correctAnswer={quiz.currentQuestion.correctAnswer}
+              options={quiz.currentQuestion.options}
+              currentIndex={quiz.currentIndex}
+              totalQuestions={quiz.totalQuestions}
+              onAnswer={quiz.submitAnswer}
+              lastAnswerCorrect={quiz.lastAnswerCorrect}
+              selectedAnswer={quiz.selectedAnswer}
+              isHardMode={difficulty === "hard"}
+              inputPlaceholder="Type the country name..."
+            />
+          )
         )}
 
         {quiz.phase === "results" && (

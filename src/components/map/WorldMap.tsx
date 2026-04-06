@@ -3,10 +3,12 @@ import {
   MapContainer,
   TileLayer,
   GeoJSON,
+  CircleMarker,
+  Tooltip,
   useMap,
 } from "react-leaflet";
 import type { FeatureCollection, Feature } from "geojson";
-import type { Layer, PathOptions, LeafletMouseEvent } from "leaflet";
+import type { Layer, PathOptions, LeafletMouseEvent, LatLngBoundsExpression } from "leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
@@ -26,6 +28,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+export interface CapitalMarker {
+  lat: number;
+  lng: number;
+  name: string;
+}
+
 interface WorldMapProps {
   interactive?: boolean;
   highlightedCountries?: string[];
@@ -36,19 +44,36 @@ interface WorldMapProps {
   zoomToCountry?: string | null;
   showBorders?: boolean;
   showLabels?: boolean;
+  /** Show capital city markers on the map */
+  capitals?: CapitalMarker[];
+  /** Initial bounds to fit the map to (e.g. region bounds) */
+  initialBounds?: LatLngBoundsExpression | null;
+  /** Use clean mode (no tile layer, just GeoJSON land) */
+  cleanMap?: boolean;
+  /** Fly to these bounds (changes trigger animation). Use a counter key to re-trigger. */
+  flyToBounds?: { bounds: LatLngBoundsExpression; key: number } | null;
+  /** Use blue highlight instead of green for the correct country */
+  correctAsHighlight?: boolean;
   className?: string;
 }
 
 const DARK_TILES =
-  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+  "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
 const DARK_TILES_ATTR =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
 const DEFAULT_STYLE: PathOptions = {
   color: "#334155",
   weight: 1,
-  fillColor: "transparent",
-  fillOpacity: 0,
+  fillColor: "#1e293b",
+  fillOpacity: 0.6,
+};
+
+const CLEAN_DEFAULT_STYLE: PathOptions = {
+  color: "#475569",
+  weight: 1,
+  fillColor: "#1e293b",
+  fillOpacity: 1,
 };
 
 const HIGHLIGHT_STYLE: PathOptions = {
@@ -107,6 +132,36 @@ function ZoomController({ zoomToCountry }: { zoomToCountry?: string | null }) {
   return null;
 }
 
+/** Sub-component that fits the map to initial bounds on mount */
+function InitialBoundsController({ bounds }: { bounds: LatLngBoundsExpression }) {
+  const map = useMap();
+  const applied = useRef(false);
+
+  useEffect(() => {
+    if (!applied.current) {
+      applied.current = true;
+      map.fitBounds(bounds, { padding: [20, 20], maxZoom: 5 });
+    }
+  }, [bounds, map]);
+
+  return null;
+}
+
+/** Sub-component that flies to bounds on key change */
+function FlyToBoundsController({ bounds, triggerKey }: { bounds: LatLngBoundsExpression; triggerKey: number }) {
+  const map = useMap();
+  const prevKey = useRef(triggerKey);
+
+  useEffect(() => {
+    if (triggerKey !== prevKey.current) {
+      prevKey.current = triggerKey;
+      map.flyToBounds(bounds, { padding: [20, 20], maxZoom: 5, duration: 0.8 });
+    }
+  }, [triggerKey, bounds, map]);
+
+  return null;
+}
+
 /** Sub-component that manages scroll-zoom behavior */
 function ScrollZoomManager() {
   const map = useMap();
@@ -144,6 +199,11 @@ export const WorldMap = memo(function WorldMap({
   zoomToCountry = null,
   showBorders = true,
   showLabels: _showLabels = false,
+  capitals = [],
+  initialBounds = null,
+  cleanMap = false,
+  flyToBounds = null,
+  correctAsHighlight = false,
   className = "",
 }: WorldMapProps) {
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
@@ -153,23 +213,28 @@ export const WorldMap = memo(function WorldMap({
     loadGeoJson().then(setGeoData);
   }, []);
 
+  const baseStyle = cleanMap ? CLEAN_DEFAULT_STYLE : DEFAULT_STYLE;
+
   const getStyle = useCallback(
     (feature?: Feature): PathOptions => {
-      if (!feature) return DEFAULT_STYLE;
+      if (!feature) return baseStyle;
       const iso = (feature.properties?.ISO_A2 || "").toLowerCase();
 
-      if (correctCountry && iso === correctCountry.toLowerCase()) return CORRECT_STYLE;
+      if (correctCountry && iso === correctCountry.toLowerCase())
+        return correctAsHighlight
+          ? { ...HIGHLIGHT_STYLE, fillOpacity: 0.6, weight: 3 }
+          : CORRECT_STYLE;
       if (wrongCountry && iso === wrongCountry.toLowerCase()) return WRONG_STYLE;
       if (selectedCountry && iso === selectedCountry.toLowerCase()) return SELECTED_STYLE;
       if (highlightSet.has(iso)) return HIGHLIGHT_STYLE;
 
       if (!showBorders) {
-        return { ...DEFAULT_STYLE, color: "transparent", weight: 0 };
+        return { ...baseStyle, color: "transparent", weight: 0 };
       }
 
-      return DEFAULT_STYLE;
+      return baseStyle;
     },
-    [highlightSet, selectedCountry, correctCountry, wrongCountry, showBorders]
+    [highlightSet, selectedCountry, correctCountry, wrongCountry, showBorders, baseStyle, correctAsHighlight]
   );
 
   const onEachFeature = useCallback(
@@ -219,9 +284,11 @@ export const WorldMap = memo(function WorldMap({
       className={`w-full h-full ${className}`}
       style={{ background: "#0f172a" }}
     >
-      <TileLayer url={DARK_TILES} attribution={DARK_TILES_ATTR} />
+      {!cleanMap && <TileLayer url={DARK_TILES} attribution={DARK_TILES_ATTR} />}
       <ScrollZoomManager />
       <ZoomController zoomToCountry={zoomToCountry} />
+      {initialBounds && <InitialBoundsController bounds={initialBounds} />}
+      {flyToBounds && <FlyToBoundsController bounds={flyToBounds.bounds} triggerKey={flyToBounds.key} />}
       {geoData && (
         <GeoJSON
           key={geoKey}
@@ -230,6 +297,23 @@ export const WorldMap = memo(function WorldMap({
           onEachFeature={onEachFeature}
         />
       )}
+      {capitals.map((cap) => (
+        <CircleMarker
+          key={`${cap.lat}-${cap.lng}`}
+          center={[cap.lat, cap.lng]}
+          radius={3}
+          pathOptions={{ color: "#fbbf24", fillColor: "#fbbf24", fillOpacity: 1, weight: 1 }}
+        >
+          <Tooltip
+            direction="top"
+            offset={[0, -5]}
+            className="capital-tooltip"
+            permanent={false}
+          >
+            {cap.name}
+          </Tooltip>
+        </CircleMarker>
+      ))}
     </MapContainer>
   );
 });

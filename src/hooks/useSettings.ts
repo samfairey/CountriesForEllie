@@ -8,6 +8,7 @@ export interface AppSettings {
   defaultDifficulty: DefaultDifficulty;
   defaultRegion: Region | "All";
   reducedMotion: boolean;
+  hasSeenSplash: boolean;
 }
 
 const STORAGE_KEY = "atlas-settings";
@@ -17,6 +18,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultDifficulty: "easy",
   defaultRegion: "All",
   reducedMotion: typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
+  hasSeenSplash: false,
 };
 
 function loadSettings(): AppSettings {

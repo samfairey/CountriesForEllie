@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
 import { useAchievements } from "../hooks/useAchievements";
@@ -67,6 +67,14 @@ export function Home() {
   const blitzHigh = getHighScore(180);
   const mastered = countMastered(progress.countryStats);
   const masterModeMastered = getMasteredCount();
+
+  const [showSplash, setShowSplash] = useState(!settings.hasSeenSplash);
+  const [splashSlide, setSplashSlide] = useState(0);
+
+  const dismissSplash = useCallback(() => {
+    setShowSplash(false);
+    update({ hasSeenSplash: true });
+  }, [update]);
 
   const region = settings.defaultRegion;
   const difficulty = settings.defaultDifficulty;
@@ -263,6 +271,87 @@ export function Home() {
           </div>
         </Link>
       </motion.div>
+
+      {/* Welcome splash overlay */}
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-navy/95 backdrop-blur-md flex items-center justify-center p-6"
+          >
+            <motion.div
+              key={splashSlide}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="max-w-sm w-full text-center"
+            >
+              {splashSlide === 0 ? (
+                <>
+                  <div className="text-7xl mb-6">🌍</div>
+                  <h2 className="text-3xl font-bold text-white mb-4">
+                    Welcome to El Atlas!
+                  </h2>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-3">
+                    Test your geography knowledge across four quiz types:
+                    <span className="text-white font-medium"> Flags</span>,
+                    <span className="text-white font-medium"> Capitals</span>,
+                    <span className="text-white font-medium"> Shapes</span>, and
+                    <span className="text-white font-medium"> Pin the Map</span>.
+                  </p>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                    Each quiz has a <span className="text-sky font-medium">default</span> direction and a
+                    {" "}<span className="text-violet-400 font-medium">reverse</span> mode.
+                    For example, Flag Quiz shows a flag and you name the country — tap
+                    {" "}<span className="text-violet-400 font-medium">⇄</span> to flip it so you
+                    see the country name and pick the flag!
+                  </p>
+                  <div className="flex gap-2 justify-center mb-4">
+                    <span className="w-2 h-2 rounded-full bg-sky" />
+                    <span className="w-2 h-2 rounded-full bg-navy-lighter" />
+                  </div>
+                  <button
+                    onClick={() => setSplashSlide(1)}
+                    className="px-8 py-3 bg-sky hover:bg-sky-dark text-white font-semibold rounded-xl transition-colors text-base"
+                  >
+                    Next
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="text-7xl mb-6">👑</div>
+                  <h2 className="text-3xl font-bold text-white mb-4">
+                    Master Every Country
+                  </h2>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-3">
+                    Your ultimate goal is to <span className="text-violet-400 font-medium">master all 195 countries</span>.
+                    Play quizzes to build your knowledge, then take on
+                    {" "}<span className="text-violet-400 font-medium">Master Mode</span> — where you must
+                    identify the flag, name the capital, and find each country on the map.
+                  </p>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                    Get all three right and that country is <span className="text-emerald font-medium">mastered</span> for good.
+                    Track your progress and aim for 100%!
+                  </p>
+                  <div className="flex gap-2 justify-center mb-4">
+                    <span className="w-2 h-2 rounded-full bg-navy-lighter" />
+                    <span className="w-2 h-2 rounded-full bg-sky" />
+                  </div>
+                  <button
+                    onClick={dismissSplash}
+                    className="px-8 py-3 bg-sky hover:bg-sky-dark text-white font-semibold rounded-xl transition-colors text-base"
+                  >
+                    Let's Go!
+                  </button>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

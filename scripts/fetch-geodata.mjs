@@ -66,6 +66,14 @@ const MAINLAND_BBOX = {
   au: [112, -44, 154, -10],           // Mainland Australia + Tasmania
   ru: [27, 41, 190, 82],              // Russia (wide enough for Far East)
   za: [16, -35, 33, -22],             // Mainland South Africa (excludes Prince Edward Is.)
+  // Pacific island nations — focus on main island group near capital
+  mh: [160, 4, 173, 12],              // Marshall Islands — Majuro + Kwajalein chains
+  pw: [131, 3, 135, 9],               // Palau — main island group
+  fm: [148, 1, 164, 10],              // Micronesia — Chuuk/Pohnpei/Kosrae (drops outliers)
+  tv: [176, -11, -179, -6],           // Tuvalu — main atolls (wraps dateline)
+  ki: [169, -4, 177, 5],              // Kiribati — Gilbert Islands around Tarawa
+  fj: [176, -21, -179, -12],          // Fiji — Viti Levu + Vanua Levu (wraps dateline)
+  to: [-177, -23, -173, -15],         // Tonga — main island chain
 };
 
 // Load our country IDs for filtering
@@ -94,9 +102,15 @@ function stripOverseas(geometry, iso) {
   if (geometry.type !== "MultiPolygon") return geometry;
 
   const [bMinLng, bMinLat, bMaxLng, bMaxLat] = bbox;
+  // Handle dateline wrapping: if minLng > maxLng, the bbox crosses the antimeridian
+  const wrapsDateline = bMinLng > bMaxLng;
   const kept = geometry.coordinates.filter((polygonCoords) => {
     const [cLng, cLat] = polygonCentroid(polygonCoords);
-    return cLng >= bMinLng && cLng <= bMaxLng && cLat >= bMinLat && cLat <= bMaxLat;
+    const inLat = cLat >= bMinLat && cLat <= bMaxLat;
+    const inLng = wrapsDateline
+      ? (cLng >= bMinLng || cLng <= bMaxLng)  // e.g. 176..180 or -180..-179
+      : (cLng >= bMinLng && cLng <= bMaxLng);
+    return inLat && inLng;
   });
 
   if (kept.length === 0) return geometry; // safety: don't remove everything

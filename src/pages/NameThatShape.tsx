@@ -198,6 +198,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
           strokeColor="#1e293b"
           strokeWidth={1.5}
           rotation={difficulty === "hard" ? rotation : 0}
+          capitalCoords={{ lat: q.subject.lat, lng: q.subject.lng }}
         />
         {difficulty === "easy" && (
           <img
@@ -278,6 +279,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                       : "#0ea5e9"
                 }
                 strokeColor="#1e293b"
+                capitalCoords={countryById.get(optionId) ? { lat: countryById.get(optionId)!.lat, lng: countryById.get(optionId)!.lng } : undefined}
                 strokeWidth={1}
               />
             </motion.button>
@@ -403,6 +405,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                       fillColor="#0ea5e9"
                       strokeColor="#1e293b"
                       strokeWidth={0.5}
+                      capitalCoords={{ lat: r.question.subject.lat, lng: r.question.subject.lng }}
                     />
                   )}
                   <img

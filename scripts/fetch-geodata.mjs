@@ -120,6 +120,26 @@ function stripOverseas(geometry, iso) {
   return { type: "MultiPolygon", coordinates: kept };
 }
 
+/**
+ * Countries that straddle the antimeridian (180°/-180°) — coordinates on
+ * opposite sides cause a 360° span. Shift negative longitudes to >180 so
+ * the outline renders compactly.
+ */
+const DATELINE_COUNTRIES = new Set(["fj", "tv"]);
+
+function normalizeDateline(geometry, iso) {
+  if (!DATELINE_COUNTRIES.has(iso)) return geometry;
+  const shift = (coords) =>
+    coords.map((c) => {
+      if (typeof c[0] === "number") {
+        // [lng, lat] — shift negative lng to positive side
+        return c[0] < 0 ? [c[0] + 360, c[1]] : c;
+      }
+      return shift(c);
+    });
+  return { ...geometry, coordinates: shift(geometry.coordinates) };
+}
+
 async function main() {
   console.log("Fetching GeoJSON from GitHub...");
   const resp = await fetch(SRC_URL);
@@ -187,7 +207,8 @@ async function main() {
       }
     }
 
-    const finalGeometry = stripOverseas(simplified.geometry, iso);
+    const strippedGeometry = stripOverseas(simplified.geometry, iso);
+    const finalGeometry = normalizeDateline(strippedGeometry, iso);
 
     kept.push({
       type: "Feature",

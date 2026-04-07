@@ -45,13 +45,25 @@ function mercatorY(lat: number): number {
  * Mercator projection — both axes in the same radian coordinate space
  * so country aspect ratios are preserved correctly.
  */
+/** Minimum rendered size (in SVG units) for a polygon to be drawn as a path.
+ *  Smaller polygons are drawn as circles so tiny atolls remain visible. */
+const MIN_POLYGON_PX = 6;
+
+interface ProjectedRing {
+  path: string;
+  cx: number;
+  cy: number;
+  w: number;
+  h: number;
+}
+
 function projectAndScale(
   rings: Position[][],
   width: number,
   height: number,
   padding: number = 10
-): { paths: string[]; viewBox: string } {
-  if (rings.length === 0) return { paths: [], viewBox: `0 0 ${width} ${height}` };
+): { projected: ProjectedRing[]; viewBox: string } {
+  if (rings.length === 0) return { projected: [], viewBox: `0 0 ${width} ${height}` };
 
   // Find bounds in projected (radian) space
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
@@ -75,16 +87,27 @@ function projectAndScale(
   const offsetX = padding + (drawW - geoW * scale) / 2;
   const offsetY = padding + (drawH - geoH * scale) / 2;
 
-  const paths = rings.map((ring) => {
+  const projected = rings.map((ring) => {
+    let rMinX = Infinity, rMaxX = -Infinity, rMinY = Infinity, rMaxY = -Infinity;
     const points = ring.map(([lng, lat]) => {
       const x = (mercatorX(lng) - minX) * scale + offsetX;
       const y = (mercatorY(lat) - minY) * scale + offsetY;
+      if (x < rMinX) rMinX = x;
+      if (x > rMaxX) rMaxX = x;
+      if (y < rMinY) rMinY = y;
+      if (y > rMaxY) rMaxY = y;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
-    return `M${points.join("L")}Z`;
+    return {
+      path: `M${points.join("L")}Z`,
+      cx: (rMinX + rMaxX) / 2,
+      cy: (rMinY + rMaxY) / 2,
+      w: rMaxX - rMinX,
+      h: rMaxY - rMinY,
+    };
   });
 
-  return { paths, viewBox: `0 0 ${width} ${height}` };
+  return { projected, viewBox: `0 0 ${width} ${height}` };
 }
 
 export const CountryOutline = memo(function CountryOutline({
@@ -98,7 +121,7 @@ export const CountryOutline = memo(function CountryOutline({
   onClick,
   className = "",
 }: CountryOutlineProps) {
-  const { paths, viewBox } = useMemo(
+  const { projected, viewBox } = useMemo(
     () => projectAndScale(extractRings(geometry), width, height),
     [geometry, width, height]
   );
@@ -119,16 +142,32 @@ export const CountryOutline = memo(function CountryOutline({
       style={{ cursor: onClick ? "pointer" : "default" }}
     >
       <g transform={transform}>
-        {paths.map((d, i) => (
-          <path
-            key={i}
-            d={d}
-            fill={fillColor}
-            stroke={strokeColor}
-            strokeWidth={strokeWidth}
-            strokeLinejoin="round"
-          />
-        ))}
+        {projected.map((ring, i) => {
+          const tooSmall = ring.w < MIN_POLYGON_PX && ring.h < MIN_POLYGON_PX;
+          if (tooSmall) {
+            return (
+              <circle
+                key={i}
+                cx={ring.cx}
+                cy={ring.cy}
+                r={MIN_POLYGON_PX / 2}
+                fill={fillColor}
+                stroke={strokeColor}
+                strokeWidth={strokeWidth}
+              />
+            );
+          }
+          return (
+            <path
+              key={i}
+              d={ring.path}
+              fill={fillColor}
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              strokeLinejoin="round"
+            />
+          );
+        })}
       </g>
     </svg>
   );

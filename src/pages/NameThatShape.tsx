@@ -74,6 +74,9 @@ function generateReverseShapeQuestions(
 
 const countryById = new Map(countries.map((c) => [c.id, c]));
 
+/** Countries whose tiny atolls should be rendered as visible dots */
+const DOT_ISLAND_IDS = new Set(["mh", "pw", "fm", "tv", "ki", "fj", "to"]);
+
 export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achievement[]) => void }) {
   const { recordAnswer, completeQuiz, progress } = useProgress();
   const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
@@ -198,6 +201,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
           strokeColor="#1e293b"
           strokeWidth={1.5}
           rotation={difficulty === "hard" ? rotation : 0}
+          dotSmallIslands={DOT_ISLAND_IDS.has(q.subject.id)}
         />
         {difficulty === "easy" && (
           <img
@@ -279,6 +283,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                 }
                 strokeColor="#1e293b"
                 strokeWidth={1}
+                dotSmallIslands={DOT_ISLAND_IDS.has(optionId)}
               />
             </motion.button>
           );
@@ -403,6 +408,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                       fillColor="#0ea5e9"
                       strokeColor="#1e293b"
                       strokeWidth={0.5}
+                      dotSmallIslands={DOT_ISLAND_IDS.has(r.question.subject.id)}
                     />
                   )}
                   <img

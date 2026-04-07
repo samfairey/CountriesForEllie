@@ -11,6 +11,8 @@ interface CountryOutlineProps {
   rotation?: number;
   onClick?: () => void;
   className?: string;
+  /** When true, polygons smaller than MIN_POLYGON_PX are rendered as visible dots */
+  dotSmallIslands?: boolean;
 }
 
 /** Extract all rings of coordinates from a geometry */
@@ -120,6 +122,7 @@ export const CountryOutline = memo(function CountryOutline({
   rotation = 0,
   onClick,
   className = "",
+  dotSmallIslands = false,
 }: CountryOutlineProps) {
   const { projected, viewBox } = useMemo(
     () => projectAndScale(extractRings(geometry), width, height),
@@ -143,7 +146,7 @@ export const CountryOutline = memo(function CountryOutline({
     >
       <g transform={transform}>
         {projected.map((ring, i) => {
-          const tooSmall = ring.w < MIN_POLYGON_PX && ring.h < MIN_POLYGON_PX;
+          const tooSmall = dotSmallIslands && ring.w < MIN_POLYGON_PX && ring.h < MIN_POLYGON_PX;
           if (tooSmall) {
             return (
               <circle

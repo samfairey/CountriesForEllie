@@ -41,32 +41,17 @@ function mercatorY(lat: number): number {
   return -Math.log(Math.tan(Math.PI / 4 + radLat / 2));
 }
 
-interface ProjectedRing {
-  path: string;
-  /** Bounding box width in pixels */
-  pxW: number;
-  /** Bounding box height in pixels */
-  pxH: number;
-  /** Centre x */
-  cx: number;
-  /** Centre y */
-  cy: number;
-}
-
 /**
  * Mercator projection — both axes in the same radian coordinate space
  * so country aspect ratios are preserved correctly.
- *
- * Returns paths and, for very small polygons, dot positions so they
- * remain visible even when the country spans a large area.
  */
 function projectAndScale(
   rings: Position[][],
   width: number,
   height: number,
   padding: number = 10
-): { paths: string[]; dots: { cx: number; cy: number; r: number }[]; viewBox: string } {
-  if (rings.length === 0) return { paths: [], dots: [], viewBox: `0 0 ${width} ${height}` };
+): { paths: string[]; viewBox: string } {
+  if (rings.length === 0) return { paths: [], viewBox: `0 0 ${width} ${height}` };
 
   // Find bounds in projected (radian) space
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
@@ -90,44 +75,16 @@ function projectAndScale(
   const offsetX = padding + (drawW - geoW * scale) / 2;
   const offsetY = padding + (drawH - geoH * scale) / 2;
 
-  // Project each ring and measure its pixel extent
-  const projected: ProjectedRing[] = rings.map((ring) => {
-    let rMinX = Infinity, rMaxX = -Infinity, rMinY = Infinity, rMaxY = -Infinity;
+  const paths = rings.map((ring) => {
     const points = ring.map(([lng, lat]) => {
       const x = (mercatorX(lng) - minX) * scale + offsetX;
       const y = (mercatorY(lat) - minY) * scale + offsetY;
-      if (x < rMinX) rMinX = x;
-      if (x > rMaxX) rMaxX = x;
-      if (y < rMinY) rMinY = y;
-      if (y > rMaxY) rMaxY = y;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
-    return {
-      path: `M${points.join("L")}Z`,
-      pxW: rMaxX - rMinX,
-      pxH: rMaxY - rMinY,
-      cx: (rMinX + rMaxX) / 2,
-      cy: (rMinY + rMaxY) / 2,
-    };
+    return `M${points.join("L")}Z`;
   });
 
-  // Minimum pixel size to be visible — rings smaller than this become dots
-  const MIN_PX = 3;
-  // Dot radius scales with canvas size so it's visible but not overpowering
-  const dotRadius = Math.max(1.5, Math.min(width, height) * 0.008);
-
-  const paths: string[] = [];
-  const dots: { cx: number; cy: number; r: number }[] = [];
-
-  for (const ring of projected) {
-    if (ring.pxW < MIN_PX && ring.pxH < MIN_PX) {
-      dots.push({ cx: ring.cx, cy: ring.cy, r: dotRadius });
-    } else {
-      paths.push(ring.path);
-    }
-  }
-
-  return { paths, dots, viewBox: `0 0 ${width} ${height}` };
+  return { paths, viewBox: `0 0 ${width} ${height}` };
 }
 
 export const CountryOutline = memo(function CountryOutline({
@@ -141,7 +98,7 @@ export const CountryOutline = memo(function CountryOutline({
   onClick,
   className = "",
 }: CountryOutlineProps) {
-  const { paths, dots, viewBox } = useMemo(
+  const { paths, viewBox } = useMemo(
     () => projectAndScale(extractRings(geometry), width, height),
     [geometry, width, height]
   );
@@ -170,15 +127,6 @@ export const CountryOutline = memo(function CountryOutline({
             stroke={strokeColor}
             strokeWidth={strokeWidth}
             strokeLinejoin="round"
-          />
-        ))}
-        {dots.map((dot, i) => (
-          <circle
-            key={`dot-${i}`}
-            cx={dot.cx}
-            cy={dot.cy}
-            r={dot.r}
-            fill={fillColor}
           />
         ))}
       </g>

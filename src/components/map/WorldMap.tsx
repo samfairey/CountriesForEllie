@@ -43,7 +43,7 @@ interface WorldMapProps {
   selectedCountry?: string | null;
   correctCountry?: string | null;
   wrongCountry?: string | null;
-  onCountryClick?: (countryId: string) => void;
+  onCountryClick?: (countryId: string, latlng?: { lat: number; lng: number }) => void;
   zoomToCountry?: string | null;
   showBorders?: boolean;
   showLabels?: boolean;
@@ -330,7 +330,7 @@ export const WorldMap = memo(function WorldMap({
         },
         click: (e: LeafletMouseEvent) => {
           L.DomEvent.stopPropagation(e);
-          onCountryClick?.(iso);
+          onCountryClick?.(iso, { lat: e.latlng.lat, lng: e.latlng.lng });
         },
       });
     },

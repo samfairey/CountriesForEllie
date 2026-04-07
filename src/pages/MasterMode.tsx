@@ -9,7 +9,7 @@ import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { useMastery } from "../hooks/useMastery";
 import { getSettings } from "../hooks/useSettings";
 import { shuffle } from "../utils/shuffle";
-import { preloadGeoJson } from "../utils/geoData";
+import { preloadGeoJson, isClickNearCountry } from "../utils/geoData";
 import { playCorrect, playWrong } from "../utils/sounds";
 import { WorldMap } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
@@ -236,16 +236,20 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
   );
 
   const handleMapClick = useCallback(
-    (countryId: string) => {
+    (countryId: string, latlng?: { lat: number; lng: number }) => {
       if (pendingAdvance.current || !currentCountry) return;
       pendingAdvance.current = true;
 
-      const correct = countryId === currentCountry.id;
+      let correct = countryId === currentCountry.id;
+      if (!correct && latlng) {
+        correct = isClickNearCountry(latlng, currentCountry.id);
+      }
+
       if (correct) playCorrect(); else playWrong();
       recordAnswer(currentCountry.id, "master-mode", correct);
 
       if (correct) {
-        setMapCorrectId(countryId);
+        setMapCorrectId(currentCountry.id);
       } else {
         setMapWrongId(countryId);
         setMapCorrectId(currentCountry.id);

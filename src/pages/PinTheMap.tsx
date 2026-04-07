@@ -9,7 +9,7 @@ import { useQuiz } from "../hooks/useQuiz";
 import { useProgress } from "../hooks/useProgress";
 import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { shuffle } from "../utils/shuffle";
-import { preloadGeoJson } from "../utils/geoData";
+import { preloadGeoJson, isClickNearCountry } from "../utils/geoData";
 import { playCorrect, playWrong } from "../utils/sounds";
 import { getSettings } from "../hooks/useSettings";
 import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
@@ -31,6 +31,11 @@ const REGION_BOUNDS: Record<Region | "All", LatLngBoundsExpression> = {
   Antarctica: [[-90, -180], [-60, 180]],
 };
 
+/**
+ * Check if a click point is within tolerance of the correct country.
+ * Tolerance scales inversely with country size so tiny countries
+ * (Vatican, Monaco, etc.) get a generous hit zone.
+ */
 /** Standard mode: show country name, user clicks on map */
 function generatePinQuestions(
   pool: Country[],
@@ -175,15 +180,22 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   }, [startGame, region, reversed]);
 
   const handleMapClick = useCallback(
-    (countryId: string) => {
+    (countryId: string, latlng?: { lat: number; lng: number }) => {
       const q = quizRef.current;
       if (!q.currentQuestion || pendingAnswer.current || q.lastAnswerCorrect !== null || reversed) return;
       pendingAnswer.current = true;
 
-      const correct = countryId === q.currentQuestion.correctAnswer;
+      let correct = countryId === q.currentQuestion.correctAnswer;
+
+      // Tolerance check: if the tap missed but was close to the correct country, accept it.
+      // Especially important for tiny countries (Vatican, Monaco, San Marino, etc.)
+      if (!correct && latlng) {
+        correct = isClickNearCountry(latlng, q.currentQuestion.correctAnswer);
+      }
+
       if (correct) playCorrect(); else playWrong();
       if (correct) {
-        setCorrectId(countryId);
+        setCorrectId(q.currentQuestion.correctAnswer);
         setWrongId(null);
       } else {
         setWrongId(countryId);
@@ -192,10 +204,11 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
       }
 
       // Show feedback on map, then submit answer and reset
+      const answerToSubmit = correct ? q.currentQuestion.correctAnswer : countryId;
       const delay = correct ? 800 : 1800;
       setTimeout(() => {
         pendingAnswer.current = false;
-        quizRef.current.submitAnswer(countryId);
+        quizRef.current.submitAnswer(answerToSubmit);
         setCorrectId(null);
         setWrongId(null);
         setZoomTarget(null);

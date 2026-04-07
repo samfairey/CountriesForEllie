@@ -95,3 +95,31 @@ export function getLeafletBounds(
 export function preloadGeoJson(): void {
   loadGeoJson().catch(() => {});
 }
+
+/**
+ * Check if a click point is within tolerance of a country's bounding box.
+ * Tolerance scales inversely with country size — tiny countries like
+ * Vatican City or Monaco get a generous ~2° buffer (~220 km at equator).
+ */
+export function isClickNearCountry(
+  click: { lat: number; lng: number },
+  countryId: string
+): boolean {
+  const geo = cachedGeoJson;
+  if (!geo) return false;
+  const feature = getCountryFeature(geo, countryId);
+  if (!feature?.geometry) return false;
+
+  const bbox = computeBBox(feature.geometry);
+  const countrySpan = Math.max(bbox.maxLng - bbox.minLng, bbox.maxLat - bbox.minLat);
+
+  // At least 2° for tiny countries, shrinks for larger ones, minimum 0.5° for large countries
+  const tolerance = Math.max(0.5, Math.min(2.0, 3.0 - countrySpan));
+
+  return (
+    click.lat >= bbox.minLat - tolerance &&
+    click.lat <= bbox.maxLat + tolerance &&
+    click.lng >= bbox.minLng - tolerance &&
+    click.lng <= bbox.maxLng + tolerance
+  );
+}

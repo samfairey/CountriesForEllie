@@ -148,14 +148,14 @@ async function main() {
     countPts(feature.geometry.coordinates);
 
     let tolerance;
-    if (bboxSpan < 2) {
+    if (bboxSpan < 3) {
       tolerance = 0;      // small countries — keep all source detail
-    } else if (bboxSpan < 5) {
-      tolerance = 0.003;  // medium-small (Belgium, Netherlands, etc.)
+    } else if (bboxSpan < 6) {
+      tolerance = 0.001;  // medium-small (Belgium, Netherlands, etc.)
     } else if (bboxSpan < 15) {
-      tolerance = 0.008;  // medium (Portugal, UK, etc.)
+      tolerance = 0.005;  // medium (Portugal, UK, etc.)
     } else {
-      tolerance = 0.012;  // large countries (Russia, Canada, etc.)
+      tolerance = 0.01;   // large countries (Russia, Canada, etc.)
     }
 
     // Skip simplification for countries with few source points

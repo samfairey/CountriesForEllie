@@ -30,6 +30,14 @@ export function Nav() {
             <span className="text-base leading-none">{soundOn ? "🔊" : "🔇"}</span>
           </button>
           <Link
+            to="/study"
+            className="text-slate-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center no-underline"
+            title="Study"
+            aria-label="Study"
+          >
+            <span className="text-base leading-none">📚</span>
+          </Link>
+          <Link
             to="/achievements"
             className="text-slate-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center no-underline"
             title="Achievements"

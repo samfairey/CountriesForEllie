@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { Region } from "../types/country";
 
 export type DefaultDifficulty = "easy" | "medium" | "hard";
+export type ThemeName = "midnight" | "daylight" | "botanical" | "garden";
 
 export interface AppSettings {
   soundEnabled: boolean;
@@ -9,6 +10,7 @@ export interface AppSettings {
   defaultRegion: Region | "All";
   reducedMotion: boolean;
   hasSeenSplash: boolean;
+  theme: ThemeName;
 }
 
 const STORAGE_KEY = "atlas-settings";
@@ -19,7 +21,14 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultRegion: "All",
   reducedMotion: typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
   hasSeenSplash: false,
+  theme: "midnight",
 };
+
+/** Apply the selected theme to <html data-theme="..."> — single source of truth. */
+export function applyTheme(theme: ThemeName): void {
+  if (typeof document === "undefined") return;
+  document.documentElement.setAttribute("data-theme", theme);
+}
 
 function loadSettings(): AppSettings {
   try {
@@ -35,6 +44,11 @@ function saveSettings(settings: AppSettings) {
 
 export function useSettings() {
   const [settings, setSettings] = useState<AppSettings>(loadSettings);
+
+  // Keep <html data-theme> in sync with stored setting
+  useEffect(() => {
+    applyTheme(settings.theme);
+  }, [settings.theme]);
 
   const update = useCallback((partial: Partial<AppSettings>) => {
     setSettings((prev) => {

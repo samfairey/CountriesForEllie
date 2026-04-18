@@ -1,7 +1,20 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useSettings } from "../hooks/useSettings";
+import { useSettings, type ThemeName } from "../hooks/useSettings";
+
+interface ThemeMeta {
+  id: ThemeName;
+  label: string;
+  swatches: string[]; // 4 colours (bg, surface, accent, secondary-accent)
+}
+
+const THEMES: ThemeMeta[] = [
+  { id: "midnight",  label: "Midnight",     swatches: ["#0f172a", "#1e293b", "#0ea5e9", "#10b981"] },
+  { id: "daylight",  label: "Daylight",     swatches: ["#f8fafc", "#ffffff", "#0ea5e9", "#10b981"] },
+  { id: "botanical", label: "Botanical",    swatches: ["#2c2418", "#3d3328", "#B46C72", "#9CA469"] },
+  { id: "garden",    label: "Garden Party", swatches: ["#1a2e2e", "#243d3d", "#9EC0EB", "#C1D591"] },
+];
 
 export function Settings() {
   const { settings, update, resetProgress } = useSettings();
@@ -17,6 +30,40 @@ export function Settings() {
       <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
 
       <div className="space-y-6">
+        {/* Theme */}
+        <div className="bg-navy-light border border-navy-lighter rounded-xl p-4">
+          <div className="text-white font-medium mb-1">Theme</div>
+          <div className="text-xs text-slate-400 mb-3">Choose your preferred look</div>
+          <div className="grid grid-cols-2 gap-2">
+            {THEMES.map((t) => {
+              const active = settings.theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => update({ theme: t.id })}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    active
+                      ? "border-sky bg-sky/10"
+                      : "border-navy-lighter hover:border-slate-500"
+                  }`}
+                  aria-pressed={active}
+                >
+                  <div className="flex gap-1 mb-2">
+                    {t.swatches.map((c, i) => (
+                      <span
+                        key={i}
+                        className="w-4 h-4 rounded-full border border-black/20"
+                        style={{ background: c }}
+                      />
+                    ))}
+                  </div>
+                  <div className="text-sm font-medium text-white">{t.label}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Reduced Motion */}
         <div className="bg-navy-light border border-navy-lighter rounded-xl p-4">
           <div className="flex items-center justify-between">

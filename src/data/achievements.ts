@@ -60,19 +60,19 @@ const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "century",
-    title: "Century",
-    description: "Complete 100 quizzes",
+    title: "Seasoned Explorer",
+    description: "Complete 50 quizzes",
     icon: "💯",
     category: "learning",
-    condition: (s) => s.progress.totalQuizzesCompleted >= 100,
+    condition: (s) => s.progress.totalQuizzesCompleted >= 50,
   },
   {
     id: "scholar",
     title: "Scholar",
-    description: "Complete 500 quizzes",
+    description: "Complete 200 quizzes",
     icon: "🎓",
     category: "learning",
-    condition: (s) => s.progress.totalQuizzesCompleted >= 500,
+    condition: (s) => s.progress.totalQuizzesCompleted >= 200,
   },
 
   // Streak Achievements

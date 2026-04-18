@@ -1,7 +1,22 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+ * Theme tokens
+ *
+ * Tailwind 4 exposes @theme values as CSS custom properties on :root, and
+ * utility classes like `bg-navy-light` compile to
+ * `background-color: var(--color-navy-light)`. By redefining those custom
+ * properties under a `[data-theme="..."]` selector, the whole app retheme
+ * without touching any Tailwind class names.
+ *
+ * The `slate-*` overrides at the bottom catch the built-in Tailwind shades
+ * that the app uses for secondary text / borders so light-mode themes
+ * remain readable.
+ * ------------------------------------------------------------------------- */
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Defaults — Midnight (see also :root[data-theme="midnight"] below) */
   --color-navy: #0f172a;
   --color-navy-light: #1e293b;
   --color-navy-lighter: #334155;
@@ -15,13 +30,69 @@
   --color-violet: #8b5cf6;
 }
 
+/* Midnight (default, redeclared here so the [data-theme] selectors all
+   have the same specificity) */
+:root,
+:root[data-theme="midnight"] {
+  --color-navy: #0f172a;
+  --color-navy-light: #1e293b;
+  --color-navy-lighter: #334155;
+  --color-emerald: #10b981;
+  --color-rose: #f43f5e;
+  --color-sky: #0ea5e9;
+  --color-gold: #f59e0b;
+  --color-violet: #8b5cf6;
+  --color-body: #e2e8f0;
+  --map-tile: "dark_nolabels";
+}
+
+:root[data-theme="daylight"] {
+  --color-navy: #f8fafc;           /* bg */
+  --color-navy-light: #ffffff;      /* surface */
+  --color-navy-lighter: #e2e8f0;    /* border */
+  --color-emerald: #10b981;
+  --color-rose: #f43f5e;
+  --color-sky: #0ea5e9;
+  --color-gold: #b45309;            /* darker gold for contrast */
+  --color-violet: #7c3aed;
+  --color-body: #0f172a;
+  --map-tile: "light_nolabels";
+}
+
+:root[data-theme="botanical"] {
+  --color-navy: #2c2418;            /* deep warm brown */
+  --color-navy-light: #3d3328;      /* warm brown surface */
+  --color-navy-lighter: #544536;    /* lighter warm brown border */
+  --color-emerald: #9CA469;         /* Dry Grass green (success) */
+  --color-rose: #A7685B;            /* Sun Baked Earth (error) */
+  --color-sky: #B46C72;             /* Dusty Rose (primary accent) */
+  --color-gold: #DAB4B4;            /* Pink Flare (highlight) */
+  --color-violet: #848543;          /* Drab olive (darker accent) */
+  --color-body: #f0e6da;
+  --map-tile: "dark_nolabels";
+}
+
+:root[data-theme="garden"] {
+  --color-navy: #1a2e2e;            /* deep teal-black */
+  --color-navy-light: #243d3d;      /* dark teal surface */
+  --color-navy-lighter: #345454;    /* lighter teal border */
+  --color-emerald: #C1D591;         /* Vetiver green (success) */
+  --color-rose: #F1B8D9;            /* Strawberry Shake pink (error) */
+  --color-sky: #9EC0EB;             /* Hydrangea (primary accent) */
+  --color-gold: #B8D5DA;            /* Duck Egg (highlight) */
+  --color-violet: #538376;          /* Basil green (darker accent) */
+  --color-body: #e8f0f0;
+  --map-tile: "dark_nolabels";
+}
+
 body {
   margin: 0;
   background-color: var(--color-navy);
-  color: #e2e8f0;
+  color: var(--color-body);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 #root {
@@ -30,7 +101,33 @@ body {
   flex-direction: column;
 }
 
-/* Focus rings — accessible and visible on dark backgrounds */
+/* ---------------------------------------------------------------------------
+ * Light-theme text-colour overrides
+ *
+ * The app uses Tailwind built-in slate-* shades for secondary text / borders
+ * which were designed to sit on dark surfaces. For Daylight, remap them to
+ * dark tones that read well on the light background.
+ * ------------------------------------------------------------------------- */
+:root[data-theme="daylight"] .text-white { color: #0f172a; }
+:root[data-theme="daylight"] .text-slate-50,
+:root[data-theme="daylight"] .text-slate-100,
+:root[data-theme="daylight"] .text-slate-200 { color: #1e293b; }
+:root[data-theme="daylight"] .text-slate-300 { color: #334155; }
+:root[data-theme="daylight"] .text-slate-400 { color: #64748b; }
+:root[data-theme="daylight"] .text-slate-500 { color: #94a3b8; }
+:root[data-theme="daylight"] .text-slate-600 { color: #cbd5e1; }
+
+/* Botanical / Garden keep the existing light-on-dark slate scale intact.
+   Just slightly tune the slate-400 (muted body text) to match theme warmth. */
+:root[data-theme="botanical"] .text-slate-400 { color: #b4a494; }
+:root[data-theme="botanical"] .text-slate-300 { color: #d4c4b4; }
+:root[data-theme="botanical"] .text-slate-500 { color: #8a7a6a; }
+
+:root[data-theme="garden"] .text-slate-400 { color: #9cb8b8; }
+:root[data-theme="garden"] .text-slate-300 { color: #b8d5d5; }
+:root[data-theme="garden"] .text-slate-500 { color: #789494; }
+
+/* Focus rings */
 *:focus-visible {
   outline: 2px solid var(--color-sky);
   outline-offset: 2px;
@@ -48,7 +145,6 @@ body {
   }
 }
 
-/* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -59,7 +155,6 @@ body {
   }
 }
 
-/* Flag images fade in on load */
 img[src*="flagcdn"] {
   animation: fadeIn 0.3s ease-out;
 }
@@ -69,7 +164,6 @@ img[src*="flagcdn"] {
   to { opacity: 1; }
 }
 
-/* Hide scrollbar for horizontal scroll containers */
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -78,27 +172,24 @@ img[src*="flagcdn"] {
   display: none;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Selection colour */
 ::selection {
   background-color: rgba(14, 165, 233, 0.3);
   color: white;
 }
 
-/* Capital city tooltip on map */
 .capital-tooltip {
-  background: #1e293b !important;
-  color: #fbbf24 !important;
-  border: 1px solid #334155 !important;
+  background: var(--color-navy-light) !important;
+  color: var(--color-gold) !important;
+  border: 1px solid var(--color-navy-lighter) !important;
   font-size: 11px !important;
   padding: 2px 6px !important;
   border-radius: 4px !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
 }
 .capital-tooltip::before {
-  border-top-color: #334155 !important;
+  border-top-color: var(--color-navy-lighter) !important;
 }

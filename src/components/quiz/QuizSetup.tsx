@@ -1,7 +1,32 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import type { Region } from "../../types/country";
+import type { Country, Region } from "../../types/country";
+import countriesData from "../../data/countries.json";
 import { getSettings } from "../../hooks/useSettings";
+import { useProgress } from "../../hooks/useProgress";
+import { filterByDifficulty } from "../../utils/countryFilters";
+import type { GameMode } from "../../types/progress";
+
+const allCountries = countriesData as Country[];
+
+/** Mastery in a specific mode = seen 3+ times at 100% accuracy */
+function isMastered(
+  stats: Record<string, { timesSeen: number; timesCorrect: number }>,
+  countryId: string,
+  mode: GameMode,
+): boolean {
+  const s = stats[`${countryId}:${mode}`];
+  return !!s && s.timesSeen >= 3 && s.timesCorrect === s.timesSeen;
+}
+
+/** The five dots shown next to each country — one per learning dimension. */
+const MASTERY_DIMENSIONS: { mode: GameMode; label: string }[] = [
+  { mode: "flag-quiz",       label: "Flag" },
+  { mode: "capital-quiz",    label: "Capital" },
+  { mode: "pin-the-map",     label: "Location" },
+  { mode: "name-that-shape", label: "Shape" },
+  { mode: "master-mode",     label: "Master" },
+];
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -9,9 +34,9 @@ const REGIONS: (Region | "All")[] = ["All", "Africa", "Americas", "Asia", "Europ
 export type DifficultyOption = { value: Difficulty; label: string; desc: string };
 
 const DEFAULT_DIFFICULTIES: DifficultyOption[] = [
-  { value: "easy", label: "Easy", desc: "4 choices" },
-  { value: "medium", label: "Medium", desc: "6 choices" },
-  { value: "hard", label: "Hard", desc: "Type it" },
+  { value: "easy", label: "Easy", desc: "10 questions · Most populated countries" },
+  { value: "medium", label: "Medium", desc: "10 questions · Least populated countries" },
+  { value: "hard", label: "Hard", desc: "20 questions · All countries" },
 ];
 
 interface QuizSetupProps {
@@ -45,8 +70,18 @@ export function QuizSetup({
   const [region, setRegion] = useState<Region | "All">(saved.defaultRegion);
   const [difficulty, setDifficulty] = useState<Difficulty>(initialDiff);
   const [reversed, setReversed] = useState(false);
+  const [showList, setShowList] = useState(false);
+  const { progress } = useProgress();
 
   const hardDisabled = disableHardWhenReversed && reversed;
+
+  /** The countries that will appear in the quiz given current region + difficulty */
+  const quizCountries = useMemo(() => {
+    const regionPool =
+      region === "All" ? allCountries : allCountries.filter((c) => c.region === region);
+    const filtered = filterByDifficulty(regionPool, difficulty);
+    return filtered.slice().sort((a, b) => a.name.localeCompare(b.name));
+  }, [region, difficulty]);
 
   return (
     <motion.div
@@ -148,6 +183,54 @@ export function QuizSetup({
       >
         Start Quiz
       </button>
+
+      {/* Country list — collapsible, supplementary info */}
+      <div className="mt-6 bg-navy-light border border-navy-lighter rounded-xl overflow-hidden">
+        <button
+          onClick={() => setShowList((v) => !v)}
+          className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-navy-lighter/30 transition-colors"
+          aria-expanded={showList}
+        >
+          <span className="text-sm font-medium text-white">
+            Countries in this quiz ({quizCountries.length})
+          </span>
+          <span className={`text-slate-400 transition-transform ${showList ? "rotate-180" : ""}`}>
+            ▾
+          </span>
+        </button>
+        {showList && (
+          <div className="max-h-80 overflow-y-auto border-t border-navy-lighter">
+            {quizCountries.map((c) => (
+              <div
+                key={c.id}
+                className="flex items-center gap-3 px-4 py-2 border-b border-navy-lighter/30 last:border-b-0"
+              >
+                <img
+                  src={c.flagSvgUrl}
+                  alt=""
+                  className="w-6 h-4 object-contain rounded-sm shrink-0"
+                  loading="lazy"
+                />
+                <span className="flex-1 text-slate-200 text-sm truncate">{c.name}</span>
+                <div className="flex items-center gap-1 shrink-0" title="Mastery across learning dimensions">
+                  {MASTERY_DIMENSIONS.map(({ mode, label }) => {
+                    const mastered = isMastered(progress.countryStats, c.id, mode);
+                    return (
+                      <span
+                        key={mode}
+                        title={`${label}: ${mastered ? "Mastered" : "Not mastered"}`}
+                        className={`w-2 h-2 rounded-full ${
+                          mastered ? "bg-emerald" : "bg-navy-lighter"
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }

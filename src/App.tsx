@@ -6,6 +6,7 @@ import { FlagQuiz } from "./pages/FlagQuiz";
 import { CapitalQuiz } from "./pages/CapitalQuiz";
 import { Settings } from "./pages/Settings";
 import { Achievements } from "./pages/Achievements";
+import { Study } from "./pages/Study";
 import { KeyboardShortcuts } from "./components/common/KeyboardShortcuts";
 import { AchievementToast } from "./components/common/AchievementToast";
 import type { Achievement } from "./data/achievements";
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="/capital-quiz" element={<CapitalQuiz onAchievements={showAchievementToast} />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/achievements" element={<Achievements />} />
+          <Route path="/study" element={<Study />} />
           <Route
             path="/pin-the-map"
             element={

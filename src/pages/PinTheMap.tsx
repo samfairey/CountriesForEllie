@@ -282,9 +282,9 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                 showReverse
                 reverseLabel={["Name \u2192 Map", "Map \u2192 Name"]}
                 difficulties={[
-                  { value: "easy", label: "Easy", desc: "Zoom + borders" },
-                  { value: "medium", label: "Medium", desc: "World + borders" },
-                  { value: "hard", label: "Hard", desc: "No borders" },
+                  { value: "easy", label: "Easy", desc: "10 questions · Most populated countries" },
+                  { value: "medium", label: "Medium", desc: "10 questions · Least populated countries" },
+                  { value: "hard", label: "Hard", desc: "20 questions · All countries" },
                 ]}
               />
             )}

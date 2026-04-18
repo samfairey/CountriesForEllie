@@ -62,6 +62,16 @@ interface WorldMapProps {
 
 const DARK_TILES =
   "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
+const LIGHT_TILES =
+  "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png";
+
+/** Pick a map tile URL that matches the active theme. Called at render time
+ *  so theme changes refresh the map on next mount. */
+function tileUrlForTheme(): string {
+  if (typeof document === "undefined") return DARK_TILES;
+  const t = document.documentElement.getAttribute("data-theme");
+  return t === "daylight" ? LIGHT_TILES : DARK_TILES;
+}
 const DARK_TILES_ATTR =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
@@ -354,7 +364,7 @@ export const WorldMap = memo(function WorldMap({
     >
       {!cleanMap && (
         <TileLayer
-          url={DARK_TILES}
+          url={tileUrlForTheme()}
           attribution={DARK_TILES_ATTR}
           updateWhenZooming={false}
           updateWhenIdle={true}

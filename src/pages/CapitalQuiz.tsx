@@ -20,9 +20,9 @@ const countries = countriesData as Country[];
 const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
 
 const CAPITAL_DIFFICULTIES: DifficultyOption[] = [
-  { value: "easy", label: "Easy", desc: "4 options + flag" },
-  { value: "medium", label: "Medium", desc: "6 options" },
-  { value: "hard", label: "Hard", desc: "Type it" },
+  { value: "easy", label: "Easy", desc: "10 questions · Most populated countries" },
+  { value: "medium", label: "Medium", desc: "10 questions · Least populated countries" },
+  { value: "hard", label: "Hard", desc: "20 questions · All countries" },
 ];
 
 /** Standard: show country name → pick capital */

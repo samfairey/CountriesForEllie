@@ -138,6 +138,22 @@ export function Home() {
         <StatPill label="Quizzes" value={`${progress.totalQuizzesCompleted}`} icon="✅" />
       </motion.div>
 
+      {/* Study banner — prominent entry above the quiz grid */}
+      <motion.div variants={item} className="mb-5">
+        <Link to="/study" className="no-underline block">
+          <div className="w-full rounded-2xl p-4 border bg-gradient-to-r from-sky/15 via-navy-light to-violet/10 border-sky/40 hover:border-sky/70 hover:shadow-lg hover:shadow-sky/10 transition-all flex items-center gap-3">
+            <span className="text-3xl shrink-0" role="img" aria-hidden="true">📚</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-white font-semibold text-sm">Study</div>
+              <div className="text-slate-400 text-xs">Review progress and target your weak spots</div>
+            </div>
+            <span className="px-3 py-1 bg-sky hover:bg-sky-dark text-white text-sm font-medium rounded-full shrink-0 transition-colors">
+              Open
+            </span>
+          </div>
+        </Link>
+      </motion.div>
+
       {/* Region selector */}
       <motion.div variants={item} className="mb-4">
         <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">

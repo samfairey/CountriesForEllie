@@ -186,21 +186,23 @@ export function StudyCountry() {
         </div>
       </div>
 
-      {/* Prev / Next */}
+      {/* Prev / Next — disabled entirely at list edges, no "—" placeholder */}
       <div className="flex items-center justify-between gap-2">
         <button
           onClick={() => prev && goTo(prev, "right")}
           disabled={!prev}
-          className="flex-1 px-3 py-2.5 rounded-xl bg-navy-light border border-navy-lighter hover:border-sky/50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-sm font-medium transition-colors text-left"
+          aria-disabled={!prev}
+          className="flex-1 px-3 py-2.5 rounded-xl bg-navy-light border border-navy-lighter enabled:hover:border-sky/50 disabled:opacity-40 disabled:pointer-events-none text-slate-200 text-sm font-medium transition-colors text-left"
         >
-          ← {prev ? prev.name : "—"}
+          {prev ? `← ${prev.name}` : "← Previous"}
         </button>
         <button
           onClick={() => next && goTo(next, "left")}
           disabled={!next}
-          className="flex-1 px-3 py-2.5 rounded-xl bg-navy-light border border-navy-lighter hover:border-sky/50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-sm font-medium transition-colors text-right"
+          aria-disabled={!next}
+          className="flex-1 px-3 py-2.5 rounded-xl bg-navy-light border border-navy-lighter enabled:hover:border-sky/50 disabled:opacity-40 disabled:pointer-events-none text-slate-200 text-sm font-medium transition-colors text-right"
         >
-          {next ? next.name : "—"} →
+          {next ? `${next.name} →` : "Next →"}
         </button>
       </div>
 

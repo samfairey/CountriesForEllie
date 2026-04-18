@@ -97,7 +97,8 @@ export function useQuiz<T>(config: QuizConfig<T>) {
       setResults(newResults);
       config.onAnswer?.(currentQuestion, correct);
 
-      const delay = correct ? 600 : 1200;
+      // 800ms on correct, 1500ms on wrong — enough time to read the reveal
+      const delay = correct ? 800 : 1500;
       setTimeout(() => {
         if (currentIndex + 1 >= totalQuestions) {
           if (timerRef.current) clearInterval(timerRef.current);

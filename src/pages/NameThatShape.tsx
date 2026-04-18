@@ -383,6 +383,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
                   isHardMode={isHardMode}
                   inputPlaceholder="Type the country name..."
                   onQuit={goHome}
+                  factCountry={q.subject}
                 />
               </div>
             )}

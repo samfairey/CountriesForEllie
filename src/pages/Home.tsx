@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
 import { useAchievements } from "../hooks/useAchievements";
 import { useSettings, type DefaultDifficulty } from "../hooks/useSettings";
@@ -70,6 +70,18 @@ export function Home() {
 
   const [showSplash, setShowSplash] = useState(!settings.hasSeenSplash);
   const [splashSlide, setSplashSlide] = useState(0);
+
+  // Reset-complete toast — shown once when arriving via ?resetToast=1 from Settings
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showResetToast, setShowResetToast] = useState(false);
+  useEffect(() => {
+    if (searchParams.get("resetToast") === "1") {
+      setShowResetToast(true);
+      setSearchParams({}, { replace: true });
+      const t = window.setTimeout(() => setShowResetToast(false), 2200);
+      return () => window.clearTimeout(t);
+    }
+  }, [searchParams, setSearchParams]);
 
   const dismissSplash = useCallback(() => {
     setShowSplash(false);
@@ -365,6 +377,22 @@ export function Home() {
                 </>
               )}
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Post-reset toast */}
+      <AnimatePresence>
+        {showResetToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[9995] px-4 py-2.5 rounded-full bg-emerald text-white text-sm font-medium shadow-lg"
+            role="status"
+          >
+            All progress has been reset
           </motion.div>
         )}
       </AnimatePresence>

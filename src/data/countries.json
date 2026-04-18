@@ -596,7 +596,8 @@
     "flagEmoji": "🇨🇳",
     "flagSvgUrl": "https://flagcdn.com/w320/cn.png",
     "alternatives": [
-      "PRC"
+      "PRC",
+      "Peoples Republic of China"
     ],
     "capitalAlternatives": [
       "Peking"
@@ -838,7 +839,9 @@
     "lng": -69.9312,
     "flagEmoji": "🇩🇴",
     "flagSvgUrl": "https://flagcdn.com/w320/do.png",
-    "alternatives": [],
+    "alternatives": [
+      "DR"
+    ],
     "capitalAlternatives": [],
     "population": 11228000
   },
@@ -2433,7 +2436,8 @@
     "flagSvgUrl": "https://flagcdn.com/w320/kn.png",
     "alternatives": [
       "St Kitts",
-      "St Kitts and Nevis"
+      "St Kitts and Nevis",
+      "Saint Kitts"
     ],
     "capitalAlternatives": [],
     "population": 48000
@@ -2467,7 +2471,8 @@
     "flagEmoji": "🇻🇨",
     "flagSvgUrl": "https://flagcdn.com/w320/vc.png",
     "alternatives": [
-      "St Vincent"
+      "St Vincent",
+      "Saint Vincent"
     ],
     "capitalAlternatives": [],
     "population": 104000
@@ -2515,7 +2520,9 @@
     "lng": 6.6131,
     "flagEmoji": "🇸🇹",
     "flagSvgUrl": "https://flagcdn.com/w320/st.png",
-    "alternatives": [],
+    "alternatives": [
+      "Sao Tome"
+    ],
     "capitalAlternatives": [],
     "population": 223000
   },
@@ -2988,7 +2995,8 @@
     "flagEmoji": "🇹🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/tr.png",
     "alternatives": [
-      "Turkiye"
+      "Turkiye",
+      "Türkiye"
     ],
     "capitalAlternatives": [
       "Ankara"

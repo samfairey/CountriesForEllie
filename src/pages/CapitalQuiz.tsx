@@ -254,6 +254,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
                 : "Type the capital city..."
             }
             onQuit={goHome}
+            factCountry={quiz.currentQuestion.subject}
           />
         )}
 

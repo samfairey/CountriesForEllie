@@ -127,6 +127,23 @@ body {
 :root[data-theme="garden"] .text-slate-300 { color: #b8d5d5; }
 :root[data-theme="garden"] .text-slate-500 { color: #789494; }
 
+/* Nav bar icon contrast
+ *
+ * Icons in the top nav default to `text-slate-400`, which becomes near-invisible
+ * against the light header in Daylight mode. Bump the nav icon colours to
+ * slate-700/hover slate-900 on light themes so they meet WCAG AA against the
+ * nav bar backdrop. Target the <nav> element so these rules don't affect the
+ * rest of the page.
+ */
+:root[data-theme="daylight"] nav .text-slate-400 { color: #334155; }
+:root[data-theme="daylight"] nav .hover\:text-white:hover { color: #0f172a; }
+:root[data-theme="daylight"] nav a, :root[data-theme="daylight"] nav button { color: #334155; }
+:root[data-theme="daylight"] nav a:hover, :root[data-theme="daylight"] nav button:hover { color: #0f172a; }
+
+/* Garden Party's nav surface is dark-teal already, but the streak gold sits
+   atop a paler accent scheme — just ensure buttons stay at least slate-200. */
+:root[data-theme="garden"] nav .text-slate-400 { color: #cbd5e1; }
+
 /* Focus rings */
 *:focus-visible {
   outline: 2px solid var(--color-sky);

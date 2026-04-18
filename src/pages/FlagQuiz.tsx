@@ -314,6 +314,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
               isHardMode={difficulty === "hard"}
               inputPlaceholder="Type the country name..."
               onQuit={goHome}
+              factCountry={quiz.currentQuestion.subject}
             />
           )
         )}

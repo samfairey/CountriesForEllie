@@ -125,18 +125,24 @@ export function QuizSetup({
         </div>
       </div>
 
-      {/* Reverse mode toggle */}
+      {/* Reverse mode toggle — full-width segmented control */}
       {showReverse && (
         <div className="mb-8">
           <label className="block text-sm font-medium text-slate-300 mb-3">
             Direction
           </label>
-          <div className="flex rounded-full bg-navy-lighter p-1">
+          <div
+            className="grid grid-cols-2 gap-2 p-1 bg-navy-lighter/50 border border-navy-lighter rounded-xl"
+            role="radiogroup"
+            aria-label="Quiz direction"
+          >
             {reverseLabel.map((label, i) => {
               const isActive = reversed === (i === 1);
               return (
                 <button
                   key={label}
+                  role="radio"
+                  aria-checked={isActive}
                   onClick={() => {
                     const newReversed = i === 1;
                     setReversed(newReversed);
@@ -144,10 +150,10 @@ export function QuizSetup({
                       setDifficulty("medium");
                     }
                   }}
-                  className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-colors ${
+                  className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-sky text-white"
-                      : "text-slate-400 hover:text-slate-200"
+                      : "bg-transparent text-slate-400 hover:text-slate-200 hover:bg-navy-lighter/50"
                   }`}
                 >
                   {label}

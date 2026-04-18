@@ -58,13 +58,15 @@ export function useSettings() {
     });
   }, []);
 
+  /** Clears all progress / achievement / leaderboard / mastery data from
+   *  localStorage. Does NOT reload — the caller can show a toast and
+   *  navigate instead. Settings (theme, etc.) are preserved. */
   const resetProgress = useCallback(() => {
     localStorage.removeItem("atlas-progress");
     localStorage.removeItem("atlas-achievements");
     localStorage.removeItem("atlas-challenge-flags");
     localStorage.removeItem("atlas-blitz-leaderboard");
     localStorage.removeItem("atlas-mastered-countries");
-    window.location.reload();
   }, []);
 
   return { settings, update, resetProgress };

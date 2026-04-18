@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProgressBar } from "../common/ProgressBar";
+import { CountryFactStrip } from "./CountryFactStrip";
+import type { Country } from "../../types/country";
 
 interface QuizQuestionProps {
   /** The visual prompt area (flag image, country name, etc.) */
@@ -21,6 +23,8 @@ interface QuizQuestionProps {
   renderOptionLabel?: (option: string) => ReactNode;
   /** Called when user wants to quit the quiz early */
   onQuit?: () => void;
+  /** If provided, a muted fact strip is shown below options after answering. */
+  factCountry?: Country | null;
 }
 
 export function QuizQuestionView({
@@ -36,6 +40,7 @@ export function QuizQuestionView({
   inputPlaceholder = "Type your answer...",
   renderOptionLabel,
   onQuit,
+  factCountry,
 }: QuizQuestionProps) {
   const [typedAnswer, setTypedAnswer] = useState("");
   const answered = lastAnswerCorrect !== null;
@@ -121,10 +126,11 @@ export function QuizQuestionView({
 
               if (answered) {
                 if (option === correctAnswer) {
+                  // Strong green fill so the correct answer is unmistakable
                   btnClass =
-                    "bg-emerald/15 border-emerald text-emerald font-semibold";
+                    "bg-emerald border-emerald text-white font-semibold";
                 } else if (option === selectedAnswer && !lastAnswerCorrect) {
-                  btnClass = "bg-rose/15 border-rose text-rose";
+                  btnClass = "bg-rose border-rose text-white";
                 } else {
                   btnClass =
                     "bg-navy-light/50 border-navy-lighter/50 text-slate-500";
@@ -148,7 +154,8 @@ export function QuizQuestionView({
           </div>
         )}
 
-        {/* Hard mode feedback */}
+        {/* Hard mode feedback — always reveal the correct answer so the
+            player can learn even when their typing was accepted. */}
         <AnimatePresence>
           {answered && isHardMode && (
             <motion.div
@@ -161,10 +168,29 @@ export function QuizQuestionView({
                   : "bg-rose/15 text-rose"
               }`}
             >
-              {lastAnswerCorrect
-                ? "Correct!"
-                : `Wrong — it was ${correctAnswer}`}
+              {lastAnswerCorrect ? (
+                <>
+                  <div>Correct!</div>
+                  <div className="text-xs font-normal text-emerald/80 mt-1">
+                    Answer: {correctAnswer}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>Not quite</div>
+                  <div className="text-xs font-normal text-rose/80 mt-1">
+                    Correct answer: {correctAnswer}
+                  </div>
+                </>
+              )}
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Did-you-know strip — only visible during the post-answer pause */}
+        <AnimatePresence>
+          {answered && factCountry && (
+            <CountryFactStrip country={factCountry} key={factCountry.id} />
           )}
         </AnimatePresence>
       </div>

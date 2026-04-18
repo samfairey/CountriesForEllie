@@ -213,7 +213,8 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
       // Show feedback on map, then submit answer and reset
       const answerToSubmit = correct ? q.currentQuestion.correctAnswer : countryId;
-      const delay = correct ? 800 : 1800;
+      // Wrong: hold 2s so the user can watch the pan-to-correct-country reveal
+      const delay = correct ? 800 : 2000;
       setTimeout(() => {
         pendingAnswer.current = false;
         quizRef.current.submitAnswer(answerToSubmit);

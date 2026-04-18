@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import { useSettings, type ThemeName } from "../hooks/useSettings";
 
 interface ThemeMeta {
@@ -18,7 +18,17 @@ const THEMES: ThemeMeta[] = [
 
 export function Settings() {
   const { settings, update, resetProgress } = useSettings();
+  const navigate = useNavigate();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const handleConfirmReset = () => {
+    resetProgress();
+    setShowResetConfirm(false);
+    // Go home first, then reload to refresh in-memory state. Reload happens
+    // after a short beat so the toast stays visible during the transition.
+    navigate("/?resetToast=1");
+    window.setTimeout(() => window.location.reload(), 1400);
+  };
 
   return (
     <motion.div
@@ -94,34 +104,12 @@ export function Settings() {
           <div className="text-xs text-slate-400 mb-3">
             Delete all learning data, achievements, and scores
           </div>
-          {!showResetConfirm ? (
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="px-4 py-2 bg-rose/10 border border-rose/30 text-rose text-sm font-medium rounded-lg hover:bg-rose/20 transition-colors"
-            >
-              Reset All Data
-            </button>
-          ) : (
-            <div className="bg-rose/5 border border-rose/20 rounded-lg p-3">
-              <p className="text-rose text-sm mb-3">
-                This will delete all your learning data. This cannot be undone.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={resetProgress}
-                  className="px-4 py-2 bg-rose text-white text-sm font-semibold rounded-lg hover:bg-rose-dark transition-colors"
-                >
-                  Confirm Reset
-                </button>
-                <button
-                  onClick={() => setShowResetConfirm(false)}
-                  className="px-4 py-2 bg-navy-lighter text-slate-300 text-sm font-medium rounded-lg hover:bg-navy-lighter/80 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="px-4 py-2 bg-rose/10 border border-rose/30 text-rose text-sm font-medium rounded-lg hover:bg-rose/20 transition-colors"
+          >
+            Reset All Data
+          </button>
         </div>
 
         {/* About */}
@@ -145,6 +133,55 @@ export function Settings() {
       >
         &larr; Back to Home
       </Link>
+
+      {/* Reset confirmation modal */}
+      <AnimatePresence>
+        {showResetConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[9990] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowResetConfirm(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reset-title"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-navy-light border border-navy-lighter rounded-2xl p-6 max-w-sm w-full shadow-xl"
+            >
+              <h2 id="reset-title" className="text-lg font-semibold text-white mb-2">
+                Reset all progress?
+              </h2>
+              <p className="text-slate-300 text-sm mb-5">
+                This will permanently delete all your quiz history, mastery
+                data, streaks, achievements, and high scores. This cannot be
+                undone.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-transparent border border-navy-lighter hover:border-slate-500 text-slate-300 hover:text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmReset}
+                  className="flex-1 px-4 py-2.5 bg-rose hover:bg-rose-dark text-white text-sm font-semibold rounded-lg transition-colors"
+                >
+                  Reset Everything
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

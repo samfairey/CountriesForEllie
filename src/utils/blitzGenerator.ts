@@ -1,6 +1,7 @@
 import type { Country } from "../types/country";
 import type { BlitzQuestion, BlitzQuestionType, BlitzDifficulty } from "../types/blitz";
 import { shuffle } from "./shuffle";
+import { filterByDifficulty } from "./countryFilters";
 
 interface GeneratorOptions {
   pool: Country[];
@@ -12,10 +13,22 @@ interface GeneratorOptions {
  * Infinite blitz question generator. Call next() to get the next question.
  * Avoids repeating the same country within 10 questions,
  * and avoids same country in different modes back-to-back.
+ *
+ * Difficulty tiers:
+ * - easy   → top 50% by population (per region), 4 MC options, no typed input
+ * - normal → all countries, 4 MC options, no typed input
+ * - expert → all countries, 6 options, occasional typed input, rotated shapes
  */
 export function createBlitzGenerator(opts: GeneratorOptions) {
-  const { pool, enabledModes, difficulty } = opts;
-  const optionCount = difficulty === "normal" ? 4 : 6;
+  const { enabledModes, difficulty } = opts;
+  // Easy filters the country pool to the most-recognisable half per region.
+  // Distractors are drawn from this same pool so they don't leak unfamiliar
+  // country names as eliminable wrong answers.
+  const pool =
+    difficulty === "easy"
+      ? filterByDifficulty(opts.pool, "easy")
+      : opts.pool;
+  const optionCount = difficulty === "expert" ? 6 : 4;
   const recentCountries: string[] = []; // last 10 country IDs
   let lastCountryId = "";
   let lastMode: BlitzQuestionType | null = null;

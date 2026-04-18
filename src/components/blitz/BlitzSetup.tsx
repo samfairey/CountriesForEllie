@@ -32,7 +32,7 @@ export function BlitzSetup({ onStart }: BlitzSetupProps) {
   const [region, setRegion] = useState<Region | "All">("All");
   const [timeLimit, setTimeLimit] = useState<TimeLimit>(180);
   const [modes, setModes] = useState<BlitzQuestionType[]>(["flag", "capital", "pinMap", "nameShape"]);
-  const [difficulty, setDifficulty] = useState<BlitzDifficulty>("normal");
+  const [difficulty, setDifficulty] = useState<BlitzDifficulty>("easy");
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const toggleMode = (mode: BlitzQuestionType) => {
@@ -132,7 +132,7 @@ export function BlitzSetup({ onStart }: BlitzSetupProps) {
       <div className="mb-6">
         <label className="block text-sm font-medium text-slate-300 mb-2">Difficulty</label>
         <div className="flex rounded-full bg-navy-lighter p-1">
-          {(["normal", "expert"] as BlitzDifficulty[]).map((d) => (
+          {(["easy", "normal", "expert"] as BlitzDifficulty[]).map((d) => (
             <button
               key={d}
               onClick={() => setDifficulty(d)}
@@ -146,6 +146,11 @@ export function BlitzSetup({ onStart }: BlitzSetupProps) {
             </button>
           ))}
         </div>
+        <p className="text-xs text-slate-500 mt-2">
+          {difficulty === "easy" && "Top 50% most populous countries · 4 options"}
+          {difficulty === "normal" && "All 195 countries · 4 options"}
+          {difficulty === "expert" && "All countries · 6 options · typed input · rotated shapes"}
+        </p>
       </div>
 
       {/* Start + Leaderboard buttons */}

@@ -10,6 +10,7 @@ import { useProgress } from "../hooks/useProgress";
 import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
+import { filterByDifficulty } from "../utils/countryFilters";
 import { loadGeoJson, getCountryFeature, preloadGeoJson } from "../utils/geoData";
 import { getSettings } from "../hooks/useSettings";
 import { QuizSetup, type Difficulty, type DifficultyOption } from "../components/quiz/QuizSetup";
@@ -141,8 +142,10 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
       geoDataRef.current = geo;
       setGeoData(geo);
 
-      const pool =
+      const regionPool =
         region === "All" ? countries : countries.filter((c) => c.region === region);
+      // Population-based difficulty tier: Easy = top 50% per region, Medium = bottom 50%, Hard = all
+      const pool = filterByDifficulty(regionPool, diff);
       const count = Math.min(QUESTIONS_PER_ROUND, pool.length);
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 

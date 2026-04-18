@@ -1,6 +1,6 @@
 export type BlitzQuestionType = "flag" | "capital" | "pinMap" | "nameShape";
 
-export type BlitzDifficulty = "normal" | "expert";
+export type BlitzDifficulty = "easy" | "normal" | "expert";
 
 export type TimeLimit = 60 | 180 | 300;
 

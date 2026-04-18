@@ -14,7 +14,8 @@
     "capitalAlternatives": [
       "Kabul",
       "Kābul"
-    ]
+    ],
+    "population": 42240000
   },
   {
     "id": "al",
@@ -33,7 +34,8 @@
     "capitalAlternatives": [
       "Tiranë",
       "Tirana"
-    ]
+    ],
+    "population": 2745000
   },
   {
     "id": "dz",
@@ -47,7 +49,8 @@
     "flagEmoji": "🇩🇿",
     "flagSvgUrl": "https://flagcdn.com/w320/dz.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 45606000
   },
   {
     "id": "ad",
@@ -61,7 +64,8 @@
     "flagEmoji": "🇦🇩",
     "flagSvgUrl": "https://flagcdn.com/w320/ad.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 80000
   },
   {
     "id": "ao",
@@ -75,7 +79,8 @@
     "flagEmoji": "🇦🇴",
     "flagSvgUrl": "https://flagcdn.com/w320/ao.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 36684000
   },
   {
     "id": "ag",
@@ -91,7 +96,8 @@
     "alternatives": [
       "Antigua"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 94000
   },
   {
     "id": "ar",
@@ -105,7 +111,8 @@
     "flagEmoji": "🇦🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/ar.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 46234000
   },
   {
     "id": "am",
@@ -124,7 +131,8 @@
     "capitalAlternatives": [
       "Erevan",
       "Yerevan"
-    ]
+    ],
+    "population": 2778000
   },
   {
     "id": "au",
@@ -141,7 +149,8 @@
       "Oz",
       "Aussie"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 26638000
   },
   {
     "id": "at",
@@ -159,7 +168,8 @@
     ],
     "capitalAlternatives": [
       "Wien"
-    ]
+    ],
+    "population": 9105000
   },
   {
     "id": "az",
@@ -176,7 +186,8 @@
     "capitalAlternatives": [
       "Bakı",
       "Baku"
-    ]
+    ],
+    "population": 10357000
   },
   {
     "id": "bs",
@@ -192,7 +203,8 @@
     "alternatives": [
       "The Bahamas"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 412000
   },
   {
     "id": "bh",
@@ -208,7 +220,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Al Manamah"
-    ]
+    ],
+    "population": 1485000
   },
   {
     "id": "bd",
@@ -222,7 +235,8 @@
     "flagEmoji": "🇧🇩",
     "flagSvgUrl": "https://flagcdn.com/w320/bd.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 172954000
   },
   {
     "id": "bb",
@@ -236,7 +250,8 @@
     "flagEmoji": "🇧🇧",
     "flagSvgUrl": "https://flagcdn.com/w320/bb.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 282000
   },
   {
     "id": "by",
@@ -252,7 +267,8 @@
     "alternatives": [
       "Byelorussia"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 9200000
   },
   {
     "id": "be",
@@ -269,7 +285,8 @@
     "capitalAlternatives": [
       "Bruxelles",
       "Brussel"
-    ]
+    ],
+    "population": 11743000
   },
   {
     "id": "bz",
@@ -283,7 +300,8 @@
     "flagEmoji": "🇧🇿",
     "flagSvgUrl": "https://flagcdn.com/w320/bz.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 410000
   },
   {
     "id": "bj",
@@ -299,7 +317,8 @@
     "alternatives": [
       "Dahomey"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 13712000
   },
   {
     "id": "bt",
@@ -313,7 +332,8 @@
     "flagEmoji": "🇧🇹",
     "flagSvgUrl": "https://flagcdn.com/w320/bt.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 787000
   },
   {
     "id": "bo",
@@ -327,7 +347,8 @@
     "flagEmoji": "🇧🇴",
     "flagSvgUrl": "https://flagcdn.com/w320/bo.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 12389000
   },
   {
     "id": "ba",
@@ -345,7 +366,8 @@
     ],
     "capitalAlternatives": [
       "Sarajevo"
-    ]
+    ],
+    "population": 3211000
   },
   {
     "id": "bw",
@@ -359,7 +381,8 @@
     "flagEmoji": "🇧🇼",
     "flagSvgUrl": "https://flagcdn.com/w320/bw.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 2675000
   },
   {
     "id": "br",
@@ -378,7 +401,8 @@
     "capitalAlternatives": [
       "Brasilia",
       "Brasília"
-    ]
+    ],
+    "population": 215313000
   },
   {
     "id": "bn",
@@ -394,7 +418,8 @@
     "alternatives": [
       "Brunei Darussalam"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 450000
   },
   {
     "id": "bg",
@@ -410,7 +435,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Sofiya"
-    ]
+    ],
+    "population": 6687000
   },
   {
     "id": "bf",
@@ -424,7 +450,8 @@
     "flagEmoji": "🇧🇫",
     "flagSvgUrl": "https://flagcdn.com/w320/bf.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 22673000
   },
   {
     "id": "bi",
@@ -438,7 +465,8 @@
     "flagEmoji": "🇧🇮",
     "flagSvgUrl": "https://flagcdn.com/w320/bi.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 13238000
   },
   {
     "id": "cv",
@@ -454,7 +482,8 @@
     "alternatives": [
       "Cape Verde"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 598000
   },
   {
     "id": "kh",
@@ -472,7 +501,8 @@
     ],
     "capitalAlternatives": [
       "Phnum Penh"
-    ]
+    ],
+    "population": 16718000
   },
   {
     "id": "cm",
@@ -486,7 +516,8 @@
     "flagEmoji": "🇨🇲",
     "flagSvgUrl": "https://flagcdn.com/w320/cm.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 28647000
   },
   {
     "id": "ca",
@@ -500,7 +531,8 @@
     "flagEmoji": "🇨🇦",
     "flagSvgUrl": "https://flagcdn.com/w320/ca.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 40097000
   },
   {
     "id": "cf",
@@ -516,7 +548,8 @@
     "alternatives": [
       "CAR"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5457000
   },
   {
     "id": "td",
@@ -533,7 +566,8 @@
     "capitalAlternatives": [
       "N'Djamena",
       "Ndjamena"
-    ]
+    ],
+    "population": 17723000
   },
   {
     "id": "cl",
@@ -547,7 +581,8 @@
     "flagEmoji": "🇨🇱",
     "flagSvgUrl": "https://flagcdn.com/w320/cl.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 19603000
   },
   {
     "id": "cn",
@@ -565,7 +600,8 @@
     ],
     "capitalAlternatives": [
       "Peking"
-    ]
+    ],
+    "population": 1412175000
   },
   {
     "id": "co",
@@ -581,7 +617,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Bogotá"
-    ]
+    ],
+    "population": 51874000
   },
   {
     "id": "km",
@@ -595,7 +632,8 @@
     "flagEmoji": "🇰🇲",
     "flagSvgUrl": "https://flagcdn.com/w320/km.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 836000
   },
   {
     "id": "cg",
@@ -612,7 +650,8 @@
       "Congo-Brazzaville",
       "Republic of the Congo"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5970000
   },
   {
     "id": "cd",
@@ -630,7 +669,8 @@
       "DRC",
       "Democratic Republic of the Congo"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 102262000
   },
   {
     "id": "cr",
@@ -644,7 +684,8 @@
     "flagEmoji": "🇨🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/cr.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5180000
   },
   {
     "id": "ci",
@@ -662,7 +703,8 @@
     ],
     "capitalAlternatives": [
       "Yamoussoukro"
-    ]
+    ],
+    "population": 28873000
   },
   {
     "id": "hr",
@@ -680,7 +722,8 @@
     ],
     "capitalAlternatives": [
       "Zagreb"
-    ]
+    ],
+    "population": 3850000
   },
   {
     "id": "cu",
@@ -694,7 +737,8 @@
     "flagEmoji": "🇨🇺",
     "flagSvgUrl": "https://flagcdn.com/w320/cu.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 11194000
   },
   {
     "id": "cy",
@@ -711,7 +755,8 @@
     "capitalAlternatives": [
       "Lefkosia",
       "Lefkoşa"
-    ]
+    ],
+    "population": 1260000
   },
   {
     "id": "cz",
@@ -729,7 +774,8 @@
     ],
     "capitalAlternatives": [
       "Praha"
-    ]
+    ],
+    "population": 10506000
   },
   {
     "id": "dk",
@@ -748,7 +794,8 @@
     "capitalAlternatives": [
       "Kobenhavn",
       "København"
-    ]
+    ],
+    "population": 5910000
   },
   {
     "id": "dj",
@@ -762,7 +809,8 @@
     "flagEmoji": "🇩🇯",
     "flagSvgUrl": "https://flagcdn.com/w320/dj.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 1136000
   },
   {
     "id": "dm",
@@ -776,7 +824,8 @@
     "flagEmoji": "🇩🇲",
     "flagSvgUrl": "https://flagcdn.com/w320/dm.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 73000
   },
   {
     "id": "do",
@@ -790,7 +839,8 @@
     "flagEmoji": "🇩🇴",
     "flagSvgUrl": "https://flagcdn.com/w320/do.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 11228000
   },
   {
     "id": "ec",
@@ -804,7 +854,8 @@
     "flagEmoji": "🇪🇨",
     "flagSvgUrl": "https://flagcdn.com/w320/ec.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 18001000
   },
   {
     "id": "eg",
@@ -821,7 +872,8 @@
     "capitalAlternatives": [
       "Al-Qahira",
       "Al Qahirah"
-    ]
+    ],
+    "population": 110990000
   },
   {
     "id": "sv",
@@ -835,7 +887,8 @@
     "flagEmoji": "🇸🇻",
     "flagSvgUrl": "https://flagcdn.com/w320/sv.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 6364000
   },
   {
     "id": "gq",
@@ -849,7 +902,8 @@
     "flagEmoji": "🇬🇶",
     "flagSvgUrl": "https://flagcdn.com/w320/gq.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 1714000
   },
   {
     "id": "er",
@@ -863,7 +917,8 @@
     "flagEmoji": "🇪🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/er.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 3749000
   },
   {
     "id": "ee",
@@ -881,7 +936,8 @@
     ],
     "capitalAlternatives": [
       "Tallinn"
-    ]
+    ],
+    "population": 1366000
   },
   {
     "id": "sz",
@@ -897,7 +953,8 @@
     "alternatives": [
       "Swaziland"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 1210000
   },
   {
     "id": "et",
@@ -913,7 +970,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Addis Abeba"
-    ]
+    ],
+    "population": 126527000
   },
   {
     "id": "fj",
@@ -927,7 +985,8 @@
     "flagEmoji": "🇫🇯",
     "flagSvgUrl": "https://flagcdn.com/w320/fj.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 924000
   },
   {
     "id": "fi",
@@ -945,7 +1004,8 @@
     ],
     "capitalAlternatives": [
       "Helsingfors"
-    ]
+    ],
+    "population": 5545000
   },
   {
     "id": "fr",
@@ -959,7 +1019,8 @@
     "flagEmoji": "🇫🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/fr.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 68043000
   },
   {
     "id": "ga",
@@ -973,7 +1034,8 @@
     "flagEmoji": "🇬🇦",
     "flagSvgUrl": "https://flagcdn.com/w320/ga.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 2436000
   },
   {
     "id": "gm",
@@ -989,7 +1051,8 @@
     "alternatives": [
       "The Gambia"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 2773000
   },
   {
     "id": "ge",
@@ -1007,7 +1070,8 @@
     ],
     "capitalAlternatives": [
       "Tiflis"
-    ]
+    ],
+    "population": 3713000
   },
   {
     "id": "de",
@@ -1025,7 +1089,8 @@
     ],
     "capitalAlternatives": [
       "Berlin"
-    ]
+    ],
+    "population": 84482000
   },
   {
     "id": "gh",
@@ -1039,7 +1104,8 @@
     "flagEmoji": "🇬🇭",
     "flagSvgUrl": "https://flagcdn.com/w320/gh.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 33476000
   },
   {
     "id": "gr",
@@ -1059,7 +1125,8 @@
     "capitalAlternatives": [
       "Athina",
       "Athinai"
-    ]
+    ],
+    "population": 10394000
   },
   {
     "id": "gd",
@@ -1073,7 +1140,8 @@
     "flagEmoji": "🇬🇩",
     "flagSvgUrl": "https://flagcdn.com/w320/gd.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 125000
   },
   {
     "id": "gt",
@@ -1087,7 +1155,8 @@
     "flagEmoji": "🇬🇹",
     "flagSvgUrl": "https://flagcdn.com/w320/gt.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 17843000
   },
   {
     "id": "gn",
@@ -1101,7 +1170,8 @@
     "flagEmoji": "🇬🇳",
     "flagSvgUrl": "https://flagcdn.com/w320/gn.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 14190000
   },
   {
     "id": "gw",
@@ -1115,7 +1185,8 @@
     "flagEmoji": "🇬🇼",
     "flagSvgUrl": "https://flagcdn.com/w320/gw.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 2151000
   },
   {
     "id": "gy",
@@ -1129,7 +1200,8 @@
     "flagEmoji": "🇬🇾",
     "flagSvgUrl": "https://flagcdn.com/w320/gy.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 815000
   },
   {
     "id": "ht",
@@ -1143,7 +1215,8 @@
     "flagEmoji": "🇭🇹",
     "flagSvgUrl": "https://flagcdn.com/w320/ht.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 11724000
   },
   {
     "id": "hn",
@@ -1157,7 +1230,8 @@
     "flagEmoji": "🇭🇳",
     "flagSvgUrl": "https://flagcdn.com/w320/hn.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 10593000
   },
   {
     "id": "hu",
@@ -1175,7 +1249,8 @@
     ],
     "capitalAlternatives": [
       "Budapest"
-    ]
+    ],
+    "population": 9606000
   },
   {
     "id": "is",
@@ -1193,7 +1268,8 @@
     ],
     "capitalAlternatives": [
       "Reykjavík"
-    ]
+    ],
+    "population": 394000
   },
   {
     "id": "in",
@@ -1211,7 +1287,8 @@
     ],
     "capitalAlternatives": [
       "Delhi"
-    ]
+    ],
+    "population": 1417173000
   },
   {
     "id": "id",
@@ -1225,7 +1302,8 @@
     "flagEmoji": "🇮🇩",
     "flagSvgUrl": "https://flagcdn.com/w320/id.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 277534000
   },
   {
     "id": "ir",
@@ -1244,7 +1322,8 @@
     "capitalAlternatives": [
       "Teheran",
       "Tehrān"
-    ]
+    ],
+    "population": 89173000
   },
   {
     "id": "iq",
@@ -1260,7 +1339,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Bagdad"
-    ]
+    ],
+    "population": 45504000
   },
   {
     "id": "ie",
@@ -1276,7 +1356,8 @@
     "alternatives": [
       "Eire"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5056000
   },
   {
     "id": "il",
@@ -1292,7 +1373,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Yerushalayim"
-    ]
+    ],
+    "population": 9756000
   },
   {
     "id": "it",
@@ -1310,7 +1392,8 @@
     ],
     "capitalAlternatives": [
       "Roma"
-    ]
+    ],
+    "population": 58870000
   },
   {
     "id": "jm",
@@ -1324,7 +1407,8 @@
     "flagEmoji": "🇯🇲",
     "flagSvgUrl": "https://flagcdn.com/w320/jm.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 2827000
   },
   {
     "id": "jp",
@@ -1344,7 +1428,8 @@
     "capitalAlternatives": [
       "Tokio",
       "Tōkyō"
-    ]
+    ],
+    "population": 124947000
   },
   {
     "id": "jo",
@@ -1360,7 +1445,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Amman"
-    ]
+    ],
+    "population": 11285000
   },
   {
     "id": "kz",
@@ -1377,7 +1463,8 @@
     "capitalAlternatives": [
       "Nur-Sultan",
       "Astana"
-    ]
+    ],
+    "population": 19606000
   },
   {
     "id": "ke",
@@ -1391,7 +1478,8 @@
     "flagEmoji": "🇰🇪",
     "flagSvgUrl": "https://flagcdn.com/w320/ke.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 54985000
   },
   {
     "id": "ki",
@@ -1405,7 +1493,8 @@
     "flagEmoji": "🇰🇮",
     "flagSvgUrl": "https://flagcdn.com/w320/ki.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 133000
   },
   {
     "id": "kp",
@@ -1421,7 +1510,8 @@
     "alternatives": [
       "DPRK"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 25990000
   },
   {
     "id": "kr",
@@ -1439,7 +1529,8 @@
     ],
     "capitalAlternatives": [
       "Soul"
-    ]
+    ],
+    "population": 51628000
   },
   {
     "id": "kw",
@@ -1455,7 +1546,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Al Kuwayt"
-    ]
+    ],
+    "population": 4310000
   },
   {
     "id": "kg",
@@ -1472,7 +1564,8 @@
     "capitalAlternatives": [
       "Bishkek",
       "Frunze"
-    ]
+    ],
+    "population": 6804000
   },
   {
     "id": "la",
@@ -1488,7 +1581,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Viangchan"
-    ]
+    ],
+    "population": 7529000
   },
   {
     "id": "lv",
@@ -1504,7 +1598,8 @@
     "alternatives": [
       "Latvija"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 1830000
   },
   {
     "id": "lb",
@@ -1518,7 +1613,8 @@
     "flagEmoji": "🇱🇧",
     "flagSvgUrl": "https://flagcdn.com/w320/lb.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5489000
   },
   {
     "id": "ls",
@@ -1532,7 +1628,8 @@
     "flagEmoji": "🇱🇸",
     "flagSvgUrl": "https://flagcdn.com/w320/ls.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 2306000
   },
   {
     "id": "lr",
@@ -1546,7 +1643,8 @@
     "flagEmoji": "🇱🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/lr.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5418000
   },
   {
     "id": "ly",
@@ -1560,7 +1658,8 @@
     "flagEmoji": "🇱🇾",
     "flagSvgUrl": "https://flagcdn.com/w320/ly.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 6888000
   },
   {
     "id": "li",
@@ -1574,7 +1673,8 @@
     "flagEmoji": "🇱🇮",
     "flagSvgUrl": "https://flagcdn.com/w320/li.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 40000
   },
   {
     "id": "lt",
@@ -1590,7 +1690,8 @@
     "alternatives": [
       "Lietuva"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 2655000
   },
   {
     "id": "lu",
@@ -1604,7 +1705,8 @@
     "flagEmoji": "🇱🇺",
     "flagSvgUrl": "https://flagcdn.com/w320/lu.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 660000
   },
   {
     "id": "mg",
@@ -1620,7 +1722,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Antananarivo"
-    ]
+    ],
+    "population": 29612000
   },
   {
     "id": "mw",
@@ -1634,7 +1737,8 @@
     "flagEmoji": "🇲🇼",
     "flagSvgUrl": "https://flagcdn.com/w320/mw.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 20405000
   },
   {
     "id": "my",
@@ -1650,7 +1754,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "KL"
-    ]
+    ],
+    "population": 33938000
   },
   {
     "id": "mv",
@@ -1664,7 +1769,8 @@
     "flagEmoji": "🇲🇻",
     "flagSvgUrl": "https://flagcdn.com/w320/mv.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 521000
   },
   {
     "id": "ml",
@@ -1678,7 +1784,8 @@
     "flagEmoji": "🇲🇱",
     "flagSvgUrl": "https://flagcdn.com/w320/ml.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 22594000
   },
   {
     "id": "mt",
@@ -1695,7 +1802,8 @@
     "capitalAlternatives": [
       "Valletta",
       "Il-Belt"
-    ]
+    ],
+    "population": 553000
   },
   {
     "id": "mh",
@@ -1709,7 +1817,8 @@
     "flagEmoji": "🇲🇭",
     "flagSvgUrl": "https://flagcdn.com/w320/mh.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 42000
   },
   {
     "id": "mr",
@@ -1723,7 +1832,8 @@
     "flagEmoji": "🇲🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/mr.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 4736000
   },
   {
     "id": "mu",
@@ -1737,7 +1847,8 @@
     "flagEmoji": "🇲🇺",
     "flagSvgUrl": "https://flagcdn.com/w320/mu.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 1262000
   },
   {
     "id": "mx",
@@ -1754,7 +1865,8 @@
     "capitalAlternatives": [
       "Ciudad de Mexico",
       "Ciudad de México"
-    ]
+    ],
+    "population": 128455000
   },
   {
     "id": "fm",
@@ -1770,7 +1882,8 @@
     "alternatives": [
       "FSM"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 114000
   },
   {
     "id": "md",
@@ -1784,7 +1897,8 @@
     "flagEmoji": "🇲🇩",
     "flagSvgUrl": "https://flagcdn.com/w320/md.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 3435000
   },
   {
     "id": "mc",
@@ -1798,7 +1912,8 @@
     "flagEmoji": "🇲🇨",
     "flagSvgUrl": "https://flagcdn.com/w320/mc.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 36000
   },
   {
     "id": "mn",
@@ -1814,7 +1929,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Ulan Bator"
-    ]
+    ],
+    "population": 3447000
   },
   {
     "id": "me",
@@ -1833,7 +1949,8 @@
     "capitalAlternatives": [
       "Podgorica",
       "Titograd"
-    ]
+    ],
+    "population": 616000
   },
   {
     "id": "ma",
@@ -1851,7 +1968,8 @@
     ],
     "capitalAlternatives": [
       "Ar-Ribat"
-    ]
+    ],
+    "population": 37457000
   },
   {
     "id": "mz",
@@ -1865,7 +1983,8 @@
     "flagEmoji": "🇲🇿",
     "flagSvgUrl": "https://flagcdn.com/w320/mz.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 32970000
   },
   {
     "id": "mm",
@@ -1883,7 +2002,8 @@
     ],
     "capitalAlternatives": [
       "Nay Pyi Taw"
-    ]
+    ],
+    "population": 54179000
   },
   {
     "id": "na",
@@ -1897,7 +2017,8 @@
     "flagEmoji": "🇳🇦",
     "flagSvgUrl": "https://flagcdn.com/w320/na.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 2567000
   },
   {
     "id": "nr",
@@ -1911,7 +2032,8 @@
     "flagEmoji": "🇳🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/nr.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 13000
   },
   {
     "id": "np",
@@ -1927,7 +2049,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Katmandu"
-    ]
+    ],
+    "population": 30548000
   },
   {
     "id": "nl",
@@ -1943,7 +2066,8 @@
     "alternatives": [
       "Holland"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 17811000
   },
   {
     "id": "nz",
@@ -1959,7 +2083,8 @@
     "alternatives": [
       "Aotearoa"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5218000
   },
   {
     "id": "ni",
@@ -1973,7 +2098,8 @@
     "flagEmoji": "🇳🇮",
     "flagSvgUrl": "https://flagcdn.com/w320/ni.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 6849000
   },
   {
     "id": "ne",
@@ -1987,7 +2113,8 @@
     "flagEmoji": "🇳🇪",
     "flagSvgUrl": "https://flagcdn.com/w320/ne.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 27203000
   },
   {
     "id": "ng",
@@ -2001,7 +2128,8 @@
     "flagEmoji": "🇳🇬",
     "flagSvgUrl": "https://flagcdn.com/w320/ng.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 218541000
   },
   {
     "id": "mk",
@@ -2021,7 +2149,8 @@
     "capitalAlternatives": [
       "Skopje",
       "Skoplje"
-    ]
+    ],
+    "population": 2085000
   },
   {
     "id": "no",
@@ -2039,7 +2168,8 @@
     ],
     "capitalAlternatives": [
       "Christiania"
-    ]
+    ],
+    "population": 5504000
   },
   {
     "id": "om",
@@ -2053,7 +2183,8 @@
     "flagEmoji": "🇴🇲",
     "flagSvgUrl": "https://flagcdn.com/w320/om.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 4715000
   },
   {
     "id": "pk",
@@ -2067,7 +2198,8 @@
     "flagEmoji": "🇵🇰",
     "flagSvgUrl": "https://flagcdn.com/w320/pk.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 240485000
   },
   {
     "id": "pw",
@@ -2081,7 +2213,8 @@
     "flagEmoji": "🇵🇼",
     "flagSvgUrl": "https://flagcdn.com/w320/pw.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 18000
   },
   {
     "id": "ps",
@@ -2097,7 +2230,8 @@
     "alternatives": [
       "Palestinian Territories"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5371000
   },
   {
     "id": "pa",
@@ -2114,7 +2248,8 @@
     "capitalAlternatives": [
       "Ciudad de Panama",
       "Ciudad de Panamá"
-    ]
+    ],
+    "population": 4446000
   },
   {
     "id": "pg",
@@ -2130,7 +2265,8 @@
     "alternatives": [
       "PNG"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 10329000
   },
   {
     "id": "py",
@@ -2146,7 +2282,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Asunción"
-    ]
+    ],
+    "population": 6781000
   },
   {
     "id": "pe",
@@ -2162,7 +2299,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Lima"
-    ]
+    ],
+    "population": 34050000
   },
   {
     "id": "ph",
@@ -2178,7 +2316,8 @@
     "alternatives": [
       "Pilipinas"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 117337000
   },
   {
     "id": "pl",
@@ -2196,7 +2335,8 @@
     ],
     "capitalAlternatives": [
       "Warszawa"
-    ]
+    ],
+    "population": 37700000
   },
   {
     "id": "pt",
@@ -2210,7 +2350,8 @@
     "flagEmoji": "🇵🇹",
     "flagSvgUrl": "https://flagcdn.com/w320/pt.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 10325000
   },
   {
     "id": "qa",
@@ -2226,7 +2367,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Ad Dawhah"
-    ]
+    ],
+    "population": 2695000
   },
   {
     "id": "ro",
@@ -2243,7 +2385,8 @@
     "capitalAlternatives": [
       "Bucuresti",
       "București"
-    ]
+    ],
+    "population": 19051000
   },
   {
     "id": "ru",
@@ -2259,7 +2402,8 @@
     "alternatives": [
       "Russian Federation"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 143826000
   },
   {
     "id": "rw",
@@ -2273,7 +2417,8 @@
     "flagEmoji": "🇷🇼",
     "flagSvgUrl": "https://flagcdn.com/w320/rw.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 13776000
   },
   {
     "id": "kn",
@@ -2290,7 +2435,8 @@
       "St Kitts",
       "St Kitts and Nevis"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 48000
   },
   {
     "id": "lc",
@@ -2306,7 +2452,8 @@
     "alternatives": [
       "St Lucia"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 179000
   },
   {
     "id": "vc",
@@ -2322,7 +2469,8 @@
     "alternatives": [
       "St Vincent"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 104000
   },
   {
     "id": "ws",
@@ -2338,7 +2486,8 @@
     "alternatives": [
       "Western Samoa"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 222000
   },
   {
     "id": "sm",
@@ -2352,7 +2501,8 @@
     "flagEmoji": "🇸🇲",
     "flagSvgUrl": "https://flagcdn.com/w320/sm.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 33000
   },
   {
     "id": "st",
@@ -2366,7 +2516,8 @@
     "flagEmoji": "🇸🇹",
     "flagSvgUrl": "https://flagcdn.com/w320/st.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 223000
   },
   {
     "id": "sa",
@@ -2385,7 +2536,8 @@
     "capitalAlternatives": [
       "Ar Riyadh",
       "Ar-Riyad"
-    ]
+    ],
+    "population": 36947000
   },
   {
     "id": "sn",
@@ -2399,7 +2551,8 @@
     "flagEmoji": "🇸🇳",
     "flagSvgUrl": "https://flagcdn.com/w320/sn.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 17763000
   },
   {
     "id": "rs",
@@ -2417,7 +2570,8 @@
     ],
     "capitalAlternatives": [
       "Beograd"
-    ]
+    ],
+    "population": 6664000
   },
   {
     "id": "sc",
@@ -2431,7 +2585,8 @@
     "flagEmoji": "🇸🇨",
     "flagSvgUrl": "https://flagcdn.com/w320/sc.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 107000
   },
   {
     "id": "sl",
@@ -2445,7 +2600,8 @@
     "flagEmoji": "🇸🇱",
     "flagSvgUrl": "https://flagcdn.com/w320/sl.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 8605000
   },
   {
     "id": "sg",
@@ -2459,7 +2615,8 @@
     "flagEmoji": "🇸🇬",
     "flagSvgUrl": "https://flagcdn.com/w320/sg.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 5917000
   },
   {
     "id": "sk",
@@ -2478,7 +2635,8 @@
     "capitalAlternatives": [
       "Bratislava",
       "Pressburg"
-    ]
+    ],
+    "population": 5430000
   },
   {
     "id": "si",
@@ -2496,7 +2654,8 @@
     ],
     "capitalAlternatives": [
       "Ljubljana"
-    ]
+    ],
+    "population": 2108000
   },
   {
     "id": "sb",
@@ -2510,7 +2669,8 @@
     "flagEmoji": "🇸🇧",
     "flagSvgUrl": "https://flagcdn.com/w320/sb.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 724000
   },
   {
     "id": "so",
@@ -2524,7 +2684,8 @@
     "flagEmoji": "🇸🇴",
     "flagSvgUrl": "https://flagcdn.com/w320/so.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 17598000
   },
   {
     "id": "za",
@@ -2540,7 +2701,8 @@
     "alternatives": [
       "RSA"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 60414000
   },
   {
     "id": "ss",
@@ -2554,7 +2716,8 @@
     "flagEmoji": "🇸🇸",
     "flagSvgUrl": "https://flagcdn.com/w320/ss.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 10913000
   },
   {
     "id": "es",
@@ -2570,7 +2733,8 @@
     "alternatives": [
       "Espana"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 48373000
   },
   {
     "id": "lk",
@@ -2589,7 +2753,8 @@
     "capitalAlternatives": [
       "Kotte",
       "Sri Jayewardenepura Kotte"
-    ]
+    ],
+    "population": 21982000
   },
   {
     "id": "sd",
@@ -2603,7 +2768,8 @@
     "flagEmoji": "🇸🇩",
     "flagSvgUrl": "https://flagcdn.com/w320/sd.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 47958000
   },
   {
     "id": "sr",
@@ -2617,7 +2783,8 @@
     "flagEmoji": "🇸🇷",
     "flagSvgUrl": "https://flagcdn.com/w320/sr.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 632000
   },
   {
     "id": "se",
@@ -2635,7 +2802,8 @@
     ],
     "capitalAlternatives": [
       "Stockholm"
-    ]
+    ],
+    "population": 10536000
   },
   {
     "id": "ch",
@@ -2655,7 +2823,8 @@
     "capitalAlternatives": [
       "Berne",
       "Berna"
-    ]
+    ],
+    "population": 8775000
   },
   {
     "id": "sy",
@@ -2671,7 +2840,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Dimashq"
-    ]
+    ],
+    "population": 21324000
   },
   {
     "id": "tj",
@@ -2688,7 +2858,8 @@
     "capitalAlternatives": [
       "Dushanbe",
       "Dyushambe"
-    ]
+    ],
+    "population": 10143000
   },
   {
     "id": "tz",
@@ -2704,7 +2875,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Dodoma"
-    ]
+    ],
+    "population": 65497000
   },
   {
     "id": "th",
@@ -2722,7 +2894,8 @@
     ],
     "capitalAlternatives": [
       "Krung Thep"
-    ]
+    ],
+    "population": 70078000
   },
   {
     "id": "tl",
@@ -2738,7 +2911,8 @@
     "alternatives": [
       "East Timor"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 1341000
   },
   {
     "id": "tg",
@@ -2752,7 +2926,8 @@
     "flagEmoji": "🇹🇬",
     "flagSvgUrl": "https://flagcdn.com/w320/tg.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 8848000
   },
   {
     "id": "to",
@@ -2766,7 +2941,8 @@
     "flagEmoji": "🇹🇴",
     "flagSvgUrl": "https://flagcdn.com/w320/to.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 107000
   },
   {
     "id": "tt",
@@ -2782,7 +2958,8 @@
     "alternatives": [
       "Trinidad"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 1534000
   },
   {
     "id": "tn",
@@ -2796,7 +2973,8 @@
     "flagEmoji": "🇹🇳",
     "flagSvgUrl": "https://flagcdn.com/w320/tn.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 11976000
   },
   {
     "id": "tr",
@@ -2814,7 +2992,8 @@
     ],
     "capitalAlternatives": [
       "Ankara"
-    ]
+    ],
+    "population": 84775000
   },
   {
     "id": "tm",
@@ -2828,7 +3007,8 @@
     "flagEmoji": "🇹🇲",
     "flagSvgUrl": "https://flagcdn.com/w320/tm.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 6431000
   },
   {
     "id": "tv",
@@ -2842,7 +3022,8 @@
     "flagEmoji": "🇹🇻",
     "flagSvgUrl": "https://flagcdn.com/w320/tv.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 11000
   },
   {
     "id": "ug",
@@ -2856,7 +3037,8 @@
     "flagEmoji": "🇺🇬",
     "flagSvgUrl": "https://flagcdn.com/w320/ug.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 45853000
   },
   {
     "id": "ua",
@@ -2873,7 +3055,8 @@
     "capitalAlternatives": [
       "Kiev",
       "Kyiv"
-    ]
+    ],
+    "population": 36744000
   },
   {
     "id": "ae",
@@ -2892,7 +3075,8 @@
     ],
     "capitalAlternatives": [
       "Abu Dhabi"
-    ]
+    ],
+    "population": 9890000
   },
   {
     "id": "gb",
@@ -2910,7 +3094,8 @@
       "Britain",
       "Great Britain"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 67886000
   },
   {
     "id": "us",
@@ -2928,7 +3113,8 @@
       "America",
       "US"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 335893000
   },
   {
     "id": "uy",
@@ -2942,7 +3128,8 @@
     "flagEmoji": "🇺🇾",
     "flagSvgUrl": "https://flagcdn.com/w320/uy.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 3423000
   },
   {
     "id": "uz",
@@ -2958,7 +3145,8 @@
     "alternatives": [],
     "capitalAlternatives": [
       "Toshkent"
-    ]
+    ],
+    "population": 34915000
   },
   {
     "id": "vu",
@@ -2972,7 +3160,8 @@
     "flagEmoji": "🇻🇺",
     "flagSvgUrl": "https://flagcdn.com/w320/vu.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 327000
   },
   {
     "id": "va",
@@ -2988,7 +3177,8 @@
     "alternatives": [
       "Holy See"
     ],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 500
   },
   {
     "id": "ve",
@@ -3002,7 +3192,8 @@
     "flagEmoji": "🇻🇪",
     "flagSvgUrl": "https://flagcdn.com/w320/ve.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 28302000
   },
   {
     "id": "vn",
@@ -3021,7 +3212,8 @@
     "capitalAlternatives": [
       "Ha Noi",
       "Hà Nội"
-    ]
+    ],
+    "population": 98187000
   },
   {
     "id": "ye",
@@ -3035,7 +3227,8 @@
     "flagEmoji": "🇾🇪",
     "flagSvgUrl": "https://flagcdn.com/w320/ye.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 33697000
   },
   {
     "id": "zm",
@@ -3049,7 +3242,8 @@
     "flagEmoji": "🇿🇲",
     "flagSvgUrl": "https://flagcdn.com/w320/zm.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 20018000
   },
   {
     "id": "zw",
@@ -3063,6 +3257,7 @@
     "flagEmoji": "🇿🇼",
     "flagSvgUrl": "https://flagcdn.com/w320/zw.png",
     "alternatives": [],
-    "capitalAlternatives": []
+    "capitalAlternatives": [],
+    "population": 16320000
   }
 ]

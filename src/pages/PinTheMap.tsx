@@ -9,6 +9,7 @@ import { useQuiz } from "../hooks/useQuiz";
 import { useProgress } from "../hooks/useProgress";
 import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { shuffle } from "../utils/shuffle";
+import { filterByDifficulty } from "../utils/countryFilters";
 import { preloadGeoJson, isClickNearCountry } from "../utils/geoData";
 import { playCorrect, playWrong } from "../utils/sounds";
 import { getSettings } from "../hooks/useSettings";
@@ -78,6 +79,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   const [reversed, setReversed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState<Region | "All">("All");
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [searchParams, setSearchParams] = useSearchParams();
   const autoStarted = useRef(false);
 
@@ -118,16 +120,19 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   quizRef.current = quiz;
 
   const startGame = useCallback(
-    (selectedRegion: Region | "All", rev: boolean) => {
+    (selectedRegion: Region | "All", diff: Difficulty, rev: boolean) => {
       setReversed(rev);
       setRegion(selectedRegion);
+      setDifficulty(diff);
       setLoading(true);
 
-      const regionPool =
+      const baseRegionPool =
         selectedRegion === "All" ? countries : countries.filter((c) => c.region === selectedRegion);
+      // Population-based difficulty tier: Easy = top 50% per region, Medium = bottom 50%, Hard = all
+      const regionPool = filterByDifficulty(baseRegionPool, diff);
       const count = Math.min(QUESTIONS_PER_ROUND, regionPool.length);
-      // Always medium: 6 options for reverse MC
-      const optionCount = 6;
+      // Reverse MC option count: Easy = 4, Medium/Hard = 6
+      const optionCount = diff === "easy" ? 4 : 6;
 
       // Preload flag images
       const preloadPromises = shuffle(regionPool)
@@ -156,8 +161,8 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
 
   // Adapter for QuizSetup's onStart signature (region, difficulty, reversed)
   const handleStart = useCallback(
-    (selectedRegion: Region | "All", _diff: Difficulty, rev: boolean) => {
-      startGame(selectedRegion, rev);
+    (selectedRegion: Region | "All", diff: Difficulty, rev: boolean) => {
+      startGame(selectedRegion, diff, rev);
     },
     [startGame]
   );
@@ -170,14 +175,15 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
       const rev = searchParams.get("reverse") === "1";
       setSearchParams({}, { replace: true });
       const saved = getSettings();
-      startGame(saved.defaultRegion, rev);
+      const diff = (saved.defaultDifficulty as Difficulty) ?? "medium";
+      startGame(saved.defaultRegion, diff, rev);
     }
   }, [searchParams, quiz.phase, startGame, setSearchParams]);
 
   const goHome = useCallback(() => navigate("/"), [navigate]);
   const replay = useCallback(() => {
-    startGame(region, reversed);
-  }, [startGame, region, reversed]);
+    startGame(region, difficulty, reversed);
+  }, [startGame, region, difficulty, reversed]);
 
   const handleMapClick = useCallback(
     (countryId: string, latlng?: { lat: number; lng: number }) => {
@@ -239,10 +245,22 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   const q = quiz.currentQuestion;
 
   // Region bounds for initial zoom
+  // Easy: always zoom to region (or to current country's continent when region="All")
+  // Medium/Hard: full world unless a region was explicitly selected
   const initialBounds = useMemo(() => {
+    if (difficulty === "easy") {
+      if (region !== "All") return REGION_BOUNDS[region];
+      // On Easy + All, zoom to the first question's continent so players see
+      // a reasonable starting view instead of the whole planet.
+      const firstRegion = quiz.currentQuestion?.subject.region;
+      return firstRegion ? REGION_BOUNDS[firstRegion] : null;
+    }
     if (region === "All") return null;
     return REGION_BOUNDS[region];
-  }, [region]);
+  }, [region, difficulty, quiz.currentQuestion?.subject.region]);
+
+  // Hard mode: hide borders to make it genuinely harder
+  const showBorders = difficulty !== "hard";
 
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
@@ -261,7 +279,11 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                 onStart={handleStart}
                 showReverse
                 reverseLabel={["Name \u2192 Map", "Map \u2192 Name"]}
-                difficulties={[{ value: "medium", label: "Medium", desc: "Borders only" }]}
+                difficulties={[
+                  { value: "easy", label: "Easy", desc: "Zoom + borders" },
+                  { value: "medium", label: "Medium", desc: "World + borders" },
+                  { value: "hard", label: "Hard", desc: "No borders" },
+                ]}
               />
             )}
           </div>
@@ -313,7 +335,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
                 zoomToCountry={
                   zoomTarget || (reversed ? q.subject.id : null)
                 }
-                showBorders
+                showBorders={showBorders}
                 capitals={[]}
                 initialBounds={initialBounds}
                 cleanMap

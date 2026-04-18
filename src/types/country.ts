@@ -19,4 +19,6 @@ export interface Country {
   flagSvgUrl: string;
   alternatives: string[];
   capitalAlternatives: string[];
+  /** Approximate 2023-2024 population estimate — used for difficulty tiering */
+  population: number;
 }

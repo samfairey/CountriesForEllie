@@ -1,18 +1,43 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import type { LatLngBoundsExpression } from "leaflet";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
+import { preloadGeoJson } from "../utils/geoData";
+import { WorldMap } from "../components/map/WorldMap";
 
 const countries = countriesData as Country[];
 
 const REGIONS: (Region | "All")[] = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"];
 
+/** Region view-box for the browse map's auto-centre behaviour.
+ *  Matches the bounds used by Pin the Map / Master Mode. */
+const REGION_BOUNDS: Record<Region | "All", LatLngBoundsExpression> = {
+  All:        [[-60, -170], [75, 180]],
+  Africa:     [[-35, -18], [37, 52]],
+  Americas:   [[-56, -170], [72, -34]],
+  Asia:       [[-10, 25], [55, 150]],
+  Europe:     [[35, -25], [72, 45]],
+  Oceania:    [[-48, 110], [15, 180]],
+  Antarctica: [[-90, -180], [-60, 180]],
+};
+
 type SortOrder = "population" | "alphabetical";
 
 export function StudyBrowse() {
+  const navigate = useNavigate();
   const [region, setRegion] = useState<Region | "All">("All");
   const [sort, setSort] = useState<SortOrder>("population");
+  /** Counter that bumps each time region changes so the map re-fits. */
+  const [flyKey, setFlyKey] = useState(0);
+
+  useEffect(() => {
+    preloadGeoJson();
+  }, []);
+
+  // Smooth re-centre when the user picks a different region
+  useEffect(() => { setFlyKey((k) => k + 1); }, [region]);
 
   const list = useMemo(() => {
     const pool = region === "All" ? countries : countries.filter((c) => c.region === region);
@@ -21,6 +46,8 @@ export function StudyBrowse() {
     else sorted.sort((a, b) => a.name.localeCompare(b.name));
     return sorted;
   }, [region, sort]);
+
+  const highlightedIds = useMemo(() => list.map((c) => c.id), [list]);
 
   return (
     <motion.div
@@ -33,7 +60,7 @@ export function StudyBrowse() {
         <span>📚</span> Browse Countries
       </h1>
       <p className="text-slate-400 mb-4 text-sm">
-        Tap any country to study its flag, capital, location, and shape.
+        Tap any country — on the map or in the list — to study it.
       </p>
 
       {/* Compact controls row: region pills + sort toggle */}
@@ -68,6 +95,34 @@ export function StudyBrowse() {
               {label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Region map — auto-centres on the active region, all filtered
+          countries highlighted. Tapping a country opens its detail page. */}
+      <div className="bg-navy-light border border-navy-lighter rounded-2xl p-2 mb-4">
+        <div className="relative h-56 rounded-lg overflow-hidden">
+          <WorldMap
+            interactive
+            highlightedCountries={highlightedIds}
+            selectedCountry={null}
+            correctCountry={null}
+            wrongCountry={null}
+            onCountryClick={(id) => {
+              // Only follow through if the tapped country is actually in the
+              // current filtered list (otherwise it's a distractor we don't
+              // want to deep-link from here)
+              if (highlightedIds.includes(id)) {
+                navigate(`/study/country/${id}?region=${region}&sort=${sort}`);
+              }
+            }}
+            zoomToCountry={null}
+            showBorders
+            correctAsHighlight
+            initialBounds={REGION_BOUNDS[region]}
+            flyToBounds={{ bounds: REGION_BOUNDS[region], key: flyKey }}
+            className="absolute inset-0"
+          />
         </div>
       </div>
 

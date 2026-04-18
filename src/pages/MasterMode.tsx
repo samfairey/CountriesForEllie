@@ -11,6 +11,7 @@ import { getSettings } from "../hooks/useSettings";
 import { shuffle } from "../utils/shuffle";
 import { preloadGeoJson, isClickNearCountry } from "../utils/geoData";
 import { playCorrect, playWrong } from "../utils/sounds";
+import { hapticCorrect, hapticWrong } from "../utils/haptics";
 import { WorldMap } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
 
@@ -199,7 +200,8 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
     (answerId: string) => {
       if (selectedAnswer !== null || !currentCountry) return;
       const correct = answerId === currentCountry.id;
-      if (correct) playCorrect(); else playWrong();
+      if (correct) { playCorrect(); hapticCorrect(); }
+      else { playWrong(); hapticWrong(); }
       setSelectedAnswer(answerId);
       setLastCorrect(correct);
       recordAnswer(currentCountry.id, "master-mode", correct);
@@ -219,7 +221,8 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
     (answer: string) => {
       if (selectedAnswer !== null || !currentCountry) return;
       const correct = answer === currentCountry.capital;
-      if (correct) playCorrect(); else playWrong();
+      if (correct) { playCorrect(); hapticCorrect(); }
+      else { playWrong(); hapticWrong(); }
       setSelectedAnswer(answer);
       setLastCorrect(correct);
       recordAnswer(currentCountry.id, "master-mode", correct);
@@ -245,7 +248,8 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
         correct = isClickNearCountry(latlng, currentCountry.id);
       }
 
-      if (correct) playCorrect(); else playWrong();
+      if (correct) { playCorrect(); hapticCorrect(); }
+      else { playWrong(); hapticWrong(); }
       recordAnswer(currentCountry.id, "master-mode", correct);
 
       if (correct) {

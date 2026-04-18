@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Achievement } from "../../data/achievements";
 import { playTone } from "../../utils/sounds";
+import { hapticAchievement } from "../../utils/haptics";
 
 interface AchievementToastProps {
   achievements: Achievement[];
@@ -19,6 +20,7 @@ export function AchievementToast({ achievements, onDismiss }: AchievementToastPr
   useEffect(() => {
     if (achievements.length > 0) {
       playAchievementSound();
+      hapticAchievement();
       const timer = setTimeout(onDismiss, 4000);
       return () => clearTimeout(timer);
     }

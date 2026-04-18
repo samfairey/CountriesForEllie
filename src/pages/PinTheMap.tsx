@@ -12,6 +12,7 @@ import { shuffle } from "../utils/shuffle";
 import { filterByDifficulty } from "../utils/countryFilters";
 import { preloadGeoJson, isClickNearCountry } from "../utils/geoData";
 import { playCorrect, playWrong } from "../utils/sounds";
+import { hapticCorrect, hapticWrong } from "../utils/haptics";
 import { getSettings } from "../hooks/useSettings";
 import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
 import { ProgressBar } from "../components/common/ProgressBar";
@@ -20,7 +21,7 @@ import { WorldMap } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
-const QUESTIONS_PER_ROUND = 20;
+const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
 
 const REGION_BOUNDS: Record<Region | "All", LatLngBoundsExpression> = {
   All: [[-60, -170], [75, 180]],
@@ -130,7 +131,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         selectedRegion === "All" ? countries : countries.filter((c) => c.region === selectedRegion);
       // Population-based difficulty tier: Easy = top 50% per region, Medium = bottom 50%, Hard = all
       const regionPool = filterByDifficulty(baseRegionPool, diff);
-      const count = Math.min(QUESTIONS_PER_ROUND, regionPool.length);
+      const count = Math.min(ROUND_LENGTH[diff], regionPool.length);
       // Reverse MC option count: Easy = 4, Medium/Hard = 6
       const optionCount = diff === "easy" ? 4 : 6;
 
@@ -199,7 +200,8 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         correct = isClickNearCountry(latlng, q.currentQuestion.correctAnswer);
       }
 
-      if (correct) playCorrect(); else playWrong();
+      if (correct) { playCorrect(); hapticCorrect(); }
+      else { playWrong(); hapticWrong(); }
       if (correct) {
         setCorrectId(q.currentQuestion.correctAnswer);
         setWrongId(null);

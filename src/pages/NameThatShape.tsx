@@ -21,7 +21,7 @@ import { CountryOutline } from "../components/quiz/CountryOutline";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
-const QUESTIONS_PER_ROUND = 20;
+const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
 
 const SHAPE_DIFFICULTIES: DifficultyOption[] = [
   { value: "easy", label: "Easy", desc: "4 options + flag" },
@@ -146,7 +146,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
         region === "All" ? countries : countries.filter((c) => c.region === region);
       // Population-based difficulty tier: Easy = top 50% per region, Medium = bottom 50%, Hard = all
       const pool = filterByDifficulty(regionPool, diff);
-      const count = Math.min(QUESTIONS_PER_ROUND, pool.length);
+      const count = Math.min(ROUND_LENGTH[diff], pool.length);
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 
       setLoading(false);

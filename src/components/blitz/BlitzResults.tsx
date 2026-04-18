@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import type { BlitzResult, BlitzQuestionType, TimeLimit } from "../../types/blitz";
 import { saveToLeaderboard } from "../../types/blitz";
 import { playHighScore } from "../../utils/sounds";
+import { hapticAchievement } from "../../utils/haptics";
 
 interface BlitzResultsProps {
   results: BlitzResult[];
@@ -47,6 +48,7 @@ export function BlitzResults({
     setIsNewHigh(newHigh);
     if (newHigh) {
       setTimeout(() => playHighScore(), 400);
+      hapticAchievement();
     }
   }, []);
 

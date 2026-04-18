@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { playCorrect, playWrong } from "../utils/sounds";
+import { hapticCorrect, hapticWrong } from "../utils/haptics";
 
 export type QuizPhase = "setup" | "playing" | "results";
 
@@ -82,7 +83,8 @@ export function useQuiz<T>(config: QuizConfig<T>) {
         correct = answer === currentQuestion.correctAnswer;
       }
 
-      if (correct) playCorrect(); else playWrong();
+      if (correct) { playCorrect(); hapticCorrect(); }
+      else { playWrong(); hapticWrong(); }
       setLastAnswerCorrect(correct);
       setSelectedAnswer(answer);
 

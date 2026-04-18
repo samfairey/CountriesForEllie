@@ -85,6 +85,9 @@ export function Settings() {
             <p>Country data: 195 UN-recognised sovereign states</p>
             <p>Flags: flagcdn.com</p>
             <p>Map borders: Natural Earth via datasets/geo-countries</p>
+            <p className="pt-2 text-slate-500">
+              &copy; 2026 Neutron Star Education Ltd. All rights reserved.
+            </p>
           </div>
         </div>
       </div>

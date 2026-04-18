@@ -18,7 +18,9 @@ import { ProgressBar } from "../components/common/ProgressBar";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
-const QUESTIONS_PER_ROUND = 20;
+/** Round length per tier. Easy/Medium draw from ~half the country pool,
+ *  so shorter rounds keep things snappy; Hard covers the full pool. */
+const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
 
 function generateFlagQuestions(
   pool: Country[],
@@ -105,7 +107,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
 
   // Track challenge flags when quiz completes
   useEffect(() => {
-    if (quiz.phase === "results" && quiz.totalQuestions >= 20) {
+    if (quiz.phase === "results" && quiz.totalQuestions >= 10) {
       if (quiz.score === quiz.totalQuestions) {
         updateChallengeFlags({ hasPerfectQuiz: true });
       }
@@ -128,7 +130,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
         region === "All" ? countries : countries.filter((c) => c.region === region);
       // Population-based difficulty tier: Easy = top 50% per region, Medium = bottom 50%, Hard = all
       const pool = filterByDifficulty(regionPool, diff);
-      const count = Math.min(QUESTIONS_PER_ROUND, pool.length);
+      const count = Math.min(ROUND_LENGTH[diff], pool.length);
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 
       setPreloading(true);

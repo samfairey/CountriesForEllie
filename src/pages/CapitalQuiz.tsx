@@ -17,7 +17,7 @@ import { QuizResults } from "../components/quiz/QuizResults";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
-const QUESTIONS_PER_ROUND = 20;
+const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
 
 const CAPITAL_DIFFICULTIES: DifficultyOption[] = [
   { value: "easy", label: "Easy", desc: "4 options + flag" },
@@ -126,7 +126,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
         region === "All" ? countries : countries.filter((c) => c.region === region);
       // Population-based difficulty tier: Easy = top 50% per region, Medium = bottom 50%, Hard = all
       const pool = filterByDifficulty(regionPool, diff);
-      const count = Math.min(QUESTIONS_PER_ROUND, pool.length);
+      const count = Math.min(ROUND_LENGTH[diff], pool.length);
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 
       // Preload flag images (used as hints on easy)

@@ -7,6 +7,7 @@ import { getCountryFeature } from "../../utils/geoData";
 import { CountryOutline } from "../quiz/CountryOutline";
 import { WorldMap } from "../map/WorldMap";
 import { playCorrect, playWrong, playStreak, playTick, playTimesUp } from "../../utils/sounds";
+import { hapticCorrect, hapticWrong, hapticStreak } from "../../utils/haptics";
 import { fuzzyMatch } from "../../utils/fuzzyMatch";
 
 interface BlitzPlayProps {
@@ -135,6 +136,7 @@ export function BlitzPlay({
       if (correct) {
         setScore((s) => s + pts);
         playCorrect();
+        hapticCorrect();
 
         // Floating points animation
         floatingIdRef.current++;
@@ -143,6 +145,7 @@ export function BlitzPlay({
         // Streak milestones
         if ([5, 10, 15, 20, 25, 30].includes(newStreak)) {
           playStreak();
+          hapticStreak();
           setStreakMilestone(newStreak);
           setTimeout(() => setStreakMilestone(null), 1200);
         }
@@ -151,6 +154,7 @@ export function BlitzPlay({
         setTimeout(advanceQuestion, 200);
       } else {
         playWrong();
+        hapticWrong();
         // Show correct answer briefly, then advance
         setTimeout(advanceQuestion, 600);
       }

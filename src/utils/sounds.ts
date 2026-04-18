@@ -41,7 +41,10 @@ export function playCorrect() {
 }
 
 export function playWrong() {
-  playTone(220, 0.2, "square", 0.08);
+  // Soft "doo-doh" — two gentle descending notes (E4 -> C4, a minor third).
+  // Feels like "not quite" rather than "you failed".
+  playTone(329.63, 0.1, "sine", 0.1);
+  setTimeout(() => playTone(261.63, 0.12, "sine", 0.1), 110);
 }
 
 export function playStreak() {

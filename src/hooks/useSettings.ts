@@ -2,6 +2,9 @@ import { useState, useCallback, useEffect } from "react";
 import type { Region } from "../types/country";
 
 export type DefaultDifficulty = "easy" | "medium" | "hard";
+/** Alias retained for quiz pages; they used to import this from the
+ *  (now removed) QuizSetup component. */
+export type Difficulty = DefaultDifficulty;
 export type ThemeName = "midnight" | "daylight" | "botanical" | "garden";
 
 export interface AppSettings {

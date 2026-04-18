@@ -10,8 +10,7 @@ import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
 import { filterByDifficulty } from "../utils/countryFilters";
-import { getSettings } from "../hooks/useSettings";
-import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
+import { getSettings, type Difficulty } from "../hooks/useSettings";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
 import { ProgressBar } from "../components/common/ProgressBar";
@@ -20,7 +19,7 @@ import type { Achievement } from "../data/achievements";
 const countries = countriesData as Country[];
 /** Round length per tier. Easy/Medium draw from ~half the country pool,
  *  so shorter rounds keep things snappy; Hard covers the full pool. */
-const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
+const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 10 };
 
 function generateFlagQuestions(
   pool: Country[],
@@ -76,7 +75,7 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
   const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
-  const [preloading, setPreloading] = useState(false);
+  // Phase "setup" shows a spinner while we preload flag images.
   const [searchParams, setSearchParams] = useSearchParams();
   const autoStarted = useRef(false);
   // Track last-used settings for replay
@@ -133,7 +132,6 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
       const count = Math.min(ROUND_LENGTH[diff], pool.length);
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 
-      setPreloading(true);
       const preloadPool = shuffle(pool).slice(0, Math.min(count * 2, pool.length));
       const preloadPromises = preloadPool.map(
         (c) =>
@@ -146,24 +144,23 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
       );
 
       Promise.all(preloadPromises).then(() => {
-        setPreloading(false);
         quizRef.current.startQuiz(pool, count, optionCount);
       });
     },
     []
   );
 
-  // Auto-start from home page
+  // There is no setup screen — always launch a round using the user's
+  // saved defaults. Reverse direction is carried on the URL from Home.
   useEffect(() => {
     if (autoStarted.current) return;
-    if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
-      autoStarted.current = true;
-      const rev = searchParams.get("reverse") === "1";
-      setSearchParams({}, { replace: true });
-      const saved = getSettings();
-      const diff = saved.defaultDifficulty as Difficulty;
-      handleStart(saved.defaultRegion, diff, rev);
-    }
+    if (quiz.phase !== "setup") return;
+    autoStarted.current = true;
+    const rev = searchParams.get("reverse") === "1";
+    setSearchParams({}, { replace: true });
+    const saved = getSettings();
+    const diff = saved.defaultDifficulty as Difficulty;
+    handleStart(saved.defaultRegion, diff, rev);
   }, [searchParams, quiz.phase, handleStart, setSearchParams]);
 
   const goHome = useCallback(() => navigate("/"), [navigate]);
@@ -241,23 +238,12 @@ export function FlagQuiz({ onAchievements }: { onAchievements?: (a: Achievement[
   return (
     <div>
       <AnimatePresence mode="wait">
+        {/* There is no setup screen — quizzes always launch with autostart=1
+            from Home. We only ever see a brief preloading spinner here. */}
         {quiz.phase === "setup" && (
-          <div key="setup">
-            {preloading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-slate-400">Loading flags...</p>
-              </div>
-            ) : (
-              <QuizSetup
-                title="Flag Quiz"
-                description="How well do you know your flags? Choose a region and difficulty to begin."
-                onStart={handleStart}
-                showReverse
-                reverseLabel={["Flag \u2192 Country", "Country \u2192 Flag"]}
-                disableHardWhenReversed
-              />
-            )}
+          <div key="setup" className="flex flex-col items-center justify-center py-20">
+            <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-slate-400">Loading flags...</p>
           </div>
         )}
 

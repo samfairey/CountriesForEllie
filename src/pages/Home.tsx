@@ -20,9 +20,9 @@ const item = {
 
 const REGIONS: (Region | "All")[] = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"];
 const DIFFICULTIES: { value: DefaultDifficulty; label: string; desc: string }[] = [
-  { value: "easy", label: "Easy", desc: "4 choices" },
-  { value: "medium", label: "Medium", desc: "6 choices" },
-  { value: "hard", label: "Hard", desc: "Type it" },
+  { value: "easy",   label: "Easy",   desc: "10 questions · Most populated" },
+  { value: "medium", label: "Medium", desc: "10 questions · Least populated" },
+  { value: "hard",   label: "Hard",   desc: "10 questions · All countries" },
 ];
 
 interface QuizMode {

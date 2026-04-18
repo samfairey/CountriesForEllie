@@ -12,8 +12,7 @@ import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
 import { filterByDifficulty } from "../utils/countryFilters";
 import { loadGeoJson, getCountryFeature, preloadGeoJson } from "../utils/geoData";
-import { getSettings } from "../hooks/useSettings";
-import { QuizSetup, type Difficulty, type DifficultyOption } from "../components/quiz/QuizSetup";
+import { getSettings, type Difficulty } from "../hooks/useSettings";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
 import { ProgressBar } from "../components/common/ProgressBar";
@@ -21,13 +20,7 @@ import { CountryOutline } from "../components/quiz/CountryOutline";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
-const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
-
-const SHAPE_DIFFICULTIES: DifficultyOption[] = [
-  { value: "easy", label: "Easy", desc: "10 questions · Most populated countries" },
-  { value: "medium", label: "Medium", desc: "10 questions · Least populated countries" },
-  { value: "hard", label: "Hard", desc: "20 questions · All countries" },
-];
+const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 10 };
 
 /** Standard: show shape → name the country */
 function generateShapeQuestions(
@@ -84,7 +77,7 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
   const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // Phase "setup" shows a spinner while geo data loads.
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
   const geoDataRef = useRef<FeatureCollection | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -136,7 +129,6 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
       setDifficulty(diff);
       setReversed(rev);
       lastRegion.current = region;
-      setLoading(true);
 
       const geo = await loadGeoJson();
       geoDataRef.current = geo;
@@ -149,7 +141,6 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
       const count = Math.min(ROUND_LENGTH[diff], pool.length);
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 
-      setLoading(false);
       quizRef.current.startQuiz(pool, count, optionCount);
     },
     []
@@ -158,14 +149,13 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
   // Auto-start from home page
   useEffect(() => {
     if (autoStarted.current) return;
-    if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
-      autoStarted.current = true;
-      const rev = searchParams.get("reverse") === "1";
-      setSearchParams({}, { replace: true });
-      const saved = getSettings();
-      const diff = saved.defaultDifficulty as Difficulty;
-      handleStart(saved.defaultRegion, diff, rev);
-    }
+    if (quiz.phase !== "setup") return;
+    autoStarted.current = true;
+    const rev = searchParams.get("reverse") === "1";
+    setSearchParams({}, { replace: true });
+    const saved = getSettings();
+    const diff = saved.defaultDifficulty as Difficulty;
+    handleStart(saved.defaultRegion, diff, rev);
   }, [searchParams, quiz.phase, handleStart, setSearchParams]);
 
   const goHome = useCallback(() => navigate("/"), [navigate]);
@@ -299,23 +289,9 @@ export function NameThatShape({ onAchievements }: { onAchievements?: (a: Achieve
     <div>
       <AnimatePresence mode="wait">
         {quiz.phase === "setup" && (
-          <div key="setup">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-slate-400">Loading shape data...</p>
-              </div>
-            ) : (
-              <QuizSetup
-                title="Name that Shape"
-                description="Can you recognise countries by their outline? Test your geography skills!"
-                onStart={handleStart}
-                showReverse
-                reverseLabel={["Shape \u2192 Name", "Name \u2192 Shape"]}
-                difficulties={SHAPE_DIFFICULTIES}
-                disableHardWhenReversed
-              />
-            )}
+          <div key="setup" className="flex flex-col items-center justify-center py-20">
+            <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-slate-400">Loading shape data...</p>
           </div>
         )}
 

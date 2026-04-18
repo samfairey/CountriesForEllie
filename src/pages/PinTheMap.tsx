@@ -13,15 +13,14 @@ import { filterByDifficulty } from "../utils/countryFilters";
 import { preloadGeoJson, isClickNearCountry } from "../utils/geoData";
 import { playCorrect, playWrong } from "../utils/sounds";
 import { hapticCorrect, hapticWrong } from "../utils/haptics";
-import { getSettings } from "../hooks/useSettings";
-import { QuizSetup, type Difficulty } from "../components/quiz/QuizSetup";
+import { getSettings, type Difficulty } from "../hooks/useSettings";
 import { ProgressBar } from "../components/common/ProgressBar";
 import { QuizResults } from "../components/quiz/QuizResults";
 import { WorldMap } from "../components/map/WorldMap";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
-const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
+const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 10 };
 
 const REGION_BOUNDS: Record<Region | "All", LatLngBoundsExpression> = {
   All: [[-60, -170], [75, 180]],
@@ -78,7 +77,7 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
   const { updateChallengeFlags } = useAchievementChecker(progress, onAchievements);
   const navigate = useNavigate();
   const [reversed, setReversed] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // Phase "setup" shows a spinner while flag/geo data loads.
   const [region, setRegion] = useState<Region | "All">("All");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -125,7 +124,6 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
       setReversed(rev);
       setRegion(selectedRegion);
       setDifficulty(diff);
-      setLoading(true);
 
       const baseRegionPool =
         selectedRegion === "All" ? countries : countries.filter((c) => c.region === selectedRegion);
@@ -149,7 +147,6 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
         );
 
       Promise.all(preloadPromises).then(() => {
-        setLoading(false);
         setCorrectId(null);
         setWrongId(null);
         setZoomTarget(null);
@@ -160,25 +157,16 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
     []
   );
 
-  // Adapter for QuizSetup's onStart signature (region, difficulty, reversed)
-  const handleStart = useCallback(
-    (selectedRegion: Region | "All", diff: Difficulty, rev: boolean) => {
-      startGame(selectedRegion, diff, rev);
-    },
-    [startGame]
-  );
-
-  // Auto-start from home page
+  // No setup screen — always launch a round with the saved defaults.
   useEffect(() => {
     if (autoStarted.current) return;
-    if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
-      autoStarted.current = true;
-      const rev = searchParams.get("reverse") === "1";
-      setSearchParams({}, { replace: true });
-      const saved = getSettings();
-      const diff = (saved.defaultDifficulty as Difficulty) ?? "medium";
-      startGame(saved.defaultRegion, diff, rev);
-    }
+    if (quiz.phase !== "setup") return;
+    autoStarted.current = true;
+    const rev = searchParams.get("reverse") === "1";
+    setSearchParams({}, { replace: true });
+    const saved = getSettings();
+    const diff = (saved.defaultDifficulty as Difficulty) ?? "medium";
+    startGame(saved.defaultRegion, diff, rev);
   }, [searchParams, quiz.phase, startGame, setSearchParams]);
 
   const goHome = useCallback(() => navigate("/"), [navigate]);
@@ -269,26 +257,11 @@ export function PinTheMap({ onAchievements }: { onAchievements?: (a: Achievement
     <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
       <AnimatePresence mode="wait">
         {quiz.phase === "setup" && (
-          <div key="setup" className="flex-1 flex items-start justify-center pt-8">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-slate-400">Loading map data...</p>
-              </div>
-            ) : (
-              <QuizSetup
-                title="Pin the Map"
-                description="Find countries on the world map. Test your geography knowledge!"
-                onStart={handleStart}
-                showReverse
-                reverseLabel={["Name \u2192 Map", "Map \u2192 Name"]}
-                difficulties={[
-                  { value: "easy", label: "Easy", desc: "10 questions · Most populated countries" },
-                  { value: "medium", label: "Medium", desc: "10 questions · Least populated countries" },
-                  { value: "hard", label: "Hard", desc: "20 questions · All countries" },
-                ]}
-              />
-            )}
+          <div key="setup" className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-slate-400">Loading map data...</p>
+            </div>
           </div>
         )}
 

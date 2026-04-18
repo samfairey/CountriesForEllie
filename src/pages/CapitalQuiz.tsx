@@ -10,20 +10,13 @@ import { useAchievementChecker } from "../hooks/useAchievementChecker";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
 import { shuffle } from "../utils/shuffle";
 import { filterByDifficulty } from "../utils/countryFilters";
-import { getSettings } from "../hooks/useSettings";
-import { QuizSetup, type Difficulty, type DifficultyOption } from "../components/quiz/QuizSetup";
+import { getSettings, type Difficulty } from "../hooks/useSettings";
 import { QuizQuestionView } from "../components/quiz/QuizQuestion";
 import { QuizResults } from "../components/quiz/QuizResults";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
-const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 20 };
-
-const CAPITAL_DIFFICULTIES: DifficultyOption[] = [
-  { value: "easy", label: "Easy", desc: "10 questions · Most populated countries" },
-  { value: "medium", label: "Medium", desc: "10 questions · Least populated countries" },
-  { value: "hard", label: "Hard", desc: "20 questions · All countries" },
-];
+const ROUND_LENGTH: Record<Difficulty, number> = { easy: 10, medium: 10, hard: 10 };
 
 /** Standard: show country name → pick capital */
 function generateCapitalQuestions(
@@ -79,7 +72,7 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
   const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [reversed, setReversed] = useState(false);
-  const [preloading, setPreloading] = useState(false);
+  // Phase "setup" shows a spinner while we preload flag images.
   const [searchParams, setSearchParams] = useSearchParams();
   const autoStarted = useRef(false);
   const lastRegion = useRef<Region | "All">("All");
@@ -130,7 +123,6 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
       const optionCount = diff === "easy" ? 4 : diff === "medium" ? 6 : 0;
 
       // Preload flag images (used as hints on easy)
-      setPreloading(true);
       const preloadPool = shuffle(pool).slice(0, count);
       const preloadPromises = preloadPool.map(
         (c) =>
@@ -143,24 +135,22 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
       );
 
       Promise.all(preloadPromises).then(() => {
-        setPreloading(false);
         quizRef.current.startQuiz(pool, count, optionCount);
       });
     },
     []
   );
 
-  // Auto-start from home page
+  // No setup screen — always launch a round with the saved defaults.
   useEffect(() => {
     if (autoStarted.current) return;
-    if (searchParams.get("autostart") === "1" && quiz.phase === "setup") {
-      autoStarted.current = true;
-      const rev = searchParams.get("reverse") === "1";
-      setSearchParams({}, { replace: true });
-      const saved = getSettings();
-      const diff = saved.defaultDifficulty as Difficulty;
-      handleStart(saved.defaultRegion, diff, rev);
-    }
+    if (quiz.phase !== "setup") return;
+    autoStarted.current = true;
+    const rev = searchParams.get("reverse") === "1";
+    setSearchParams({}, { replace: true });
+    const saved = getSettings();
+    const diff = saved.defaultDifficulty as Difficulty;
+    handleStart(saved.defaultRegion, diff, rev);
   }, [searchParams, quiz.phase, handleStart, setSearchParams]);
 
   const goHome = useCallback(() => navigate("/"), [navigate]);
@@ -217,22 +207,9 @@ export function CapitalQuiz({ onAchievements }: { onAchievements?: (a: Achieveme
     <div>
       <AnimatePresence mode="wait">
         {quiz.phase === "setup" && (
-          <div key="setup">
-            {preloading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-slate-400">Loading...</p>
-              </div>
-            ) : (
-              <QuizSetup
-                title="Capital Quiz"
-                description="Test your knowledge of world capitals. Choose a region and difficulty to begin."
-                onStart={handleStart}
-                showReverse
-                reverseLabel={["Country \u2192 Capital", "Capital \u2192 Country"]}
-                difficulties={CAPITAL_DIFFICULTIES}
-              />
-            )}
+          <div key="setup" className="flex flex-col items-center justify-center py-20">
+            <div className="w-8 h-8 border-3 border-sky border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-slate-400">Loading...</p>
           </div>
         )}
 

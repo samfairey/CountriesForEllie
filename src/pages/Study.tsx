@@ -99,8 +99,6 @@ export function Study() {
   );
 
   const openBrowser = () => navigate("/study/browse");
-  // Secondary: keep the old quiz-style review accessible for users who want it.
-  const startReview = () => navigate("/flag-quiz?autostart=1");
 
   return (
     <motion.div
@@ -133,14 +131,6 @@ export function Study() {
         >
           Browse Countries
         </button>
-        {buckets.learning > 0 && (
-          <button
-            onClick={startReview}
-            className="w-full mt-2 py-2 bg-transparent border border-navy-lighter hover:border-sky/50 text-slate-300 hover:text-white text-sm font-medium rounded-xl transition-colors"
-          >
-            Review Due Cards ({buckets.dueToday})
-          </button>
-        )}
       </div>
 
       {/* Quick stats */}

@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import type { Region } from "../../types/country";
+import type { Country, Region } from "../../types/country";
+import countriesData from "../../data/countries.json";
 import { getSettings } from "../../hooks/useSettings";
+import { filterByDifficulty } from "../../utils/countryFilters";
+import { CountryListPreview } from "./CountryListPreview";
+
+const allCountries = countriesData as Country[];
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -47,6 +52,17 @@ export function QuizSetup({
   const [reversed, setReversed] = useState(false);
 
   const hardDisabled = disableHardWhenReversed && reversed;
+
+  /** Live preview of the country pool for the upcoming round. Reflects
+   *  the current region + difficulty exactly — must match the pool each
+   *  quiz builds in its handleStart. */
+  const previewCountries = useMemo(() => {
+    const regionPool =
+      region === "All" ? allCountries : allCountries.filter((c) => c.region === region);
+    return filterByDifficulty(regionPool, difficulty)
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [region, difficulty]);
 
   return (
     <motion.div
@@ -148,6 +164,8 @@ export function QuizSetup({
       >
         Start Quiz
       </button>
+
+      <CountryListPreview countries={previewCountries} />
     </motion.div>
   );
 }

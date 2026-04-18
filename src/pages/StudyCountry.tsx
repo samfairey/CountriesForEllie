@@ -4,8 +4,6 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import type { FeatureCollection, Geometry } from "geojson";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
-import type { GameMode } from "../types/progress";
-import { useProgress } from "../hooks/useProgress";
 import { loadGeoJson, getCountryFeature } from "../utils/geoData";
 import { CountryOutline } from "../components/quiz/CountryOutline";
 import { WorldMap } from "../components/map/WorldMap";
@@ -15,35 +13,15 @@ const countryById = new Map(countries.map((c) => [c.id, c]));
 
 type SortOrder = "population" | "alphabetical";
 
-const DIMENSIONS: { mode: GameMode; label: string }[] = [
-  { mode: "flag-quiz",       label: "Flag" },
-  { mode: "capital-quiz",    label: "Capital" },
-  { mode: "pin-the-map",     label: "Location" },
-  { mode: "name-that-shape", label: "Shape" },
-  { mode: "master-mode",     label: "Reverse" },
-];
-
-/** Status buckets for mastery colour-coding */
-type Status = "mastered" | "learning" | "unseen";
-function statusOf(
-  stats: Record<string, { timesSeen: number; timesCorrect: number }>,
-  id: string,
-  mode: GameMode,
-): Status {
-  const s = stats[`${id}:${mode}`];
-  if (!s) return "unseen";
-  if (s.timesSeen >= 3 && s.timesCorrect === s.timesSeen) return "mastered";
-  return "learning";
-}
-
 const DOT_ISLAND_IDS = new Set(["mh", "pw", "fm", "tv", "ki", "fj", "to"]);
 
 export function StudyCountry() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { progress, markKnown } = useProgress();
   const [searchParams] = useSearchParams();
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
+  // Tactile nudge: 0 by default; swipe sets to ±20 then navigates on frame-out
+  const [nudgeX, setNudgeX] = useState(0);
 
   // Preserve the sort order + region the browser used so prev/next match
   const region = (searchParams.get("region") as Region | "All" | null) ?? "All";
@@ -62,7 +40,6 @@ export function StudyCountry() {
   const prev = currentIdx > 0 ? siblingList[currentIdx - 1] : null;
   const next = currentIdx >= 0 && currentIdx < siblingList.length - 1 ? siblingList[currentIdx + 1] : null;
 
-  // Load map data once
   useEffect(() => {
     let cancelled = false;
     loadGeoJson().then((g) => { if (!cancelled) setGeoData(g); });
@@ -74,31 +51,51 @@ export function StudyCountry() {
     return getCountryFeature(geoData, country.id)?.geometry ?? null;
   }, [geoData, country]);
 
-  // Keyboard + swipe navigation through the list
+  /** Navigate with a subtle nudge animation so the user sees their swipe registered. */
+  const goTo = useCallback(
+    (target: Country, direction: "left" | "right") => {
+      setNudgeX(direction === "left" ? -20 : 20);
+      window.setTimeout(() => {
+        navigate(`/study/country/${target.id}?region=${region}&sort=${sort}`);
+      }, 150);
+    },
+    [navigate, region, sort],
+  );
+
+  // Swipe handling — but only on non-map areas. A data-no-swipe attribute
+  // on the map wrapper lets Leaflet handle its own pan/zoom gestures
+  // without us hijacking them to change country.
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest?.("[data-no-swipe]")) {
+      touchStartX.current = null;
+      return;
+    }
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
   }, []);
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
+    if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
     touchStartX.current = null;
-    if (Math.abs(dx) < 60) return;
-    const qs = `?region=${region}&sort=${sort}`;
-    if (dx < 0 && next) navigate(`/study/country/${next.id}${qs}`);
-    else if (dx > 0 && prev) navigate(`/study/country/${prev.id}${qs}`);
-  }, [prev, next, navigate, region, sort]);
+    touchStartY.current = null;
+    // Require a mostly-horizontal swipe so vertical scrolling isn't captured
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+    if (dx < 0 && next) goTo(next, "left");
+    else if (dx > 0 && prev) goTo(prev, "right");
+  }, [prev, next, goTo]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const qs = `?region=${region}&sort=${sort}`;
-      if (e.key === "ArrowLeft" && prev) navigate(`/study/country/${prev.id}${qs}`);
-      else if (e.key === "ArrowRight" && next) navigate(`/study/country/${next.id}${qs}`);
+      if (e.key === "ArrowLeft" && prev) goTo(prev, "right");
+      else if (e.key === "ArrowRight" && next) goTo(next, "left");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [prev, next, navigate, region, sort]);
+  }, [prev, next, goTo]);
 
   if (!country) {
     return (
@@ -111,19 +108,15 @@ export function StudyCountry() {
     );
   }
 
-  const handleMarkKnown = () => {
-    DIMENSIONS.forEach(({ mode }) => markKnown(country.id, mode));
-  };
-
   const populationFormatted = country.population.toLocaleString("en-US");
   const hasOfficial = country.officialName && country.officialName !== country.name;
 
   return (
     <motion.div
       key={country.id}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
+      initial={{ opacity: 0, x: 24 }}
+      animate={{ opacity: 1, x: nudgeX }}
+      transition={{ duration: nudgeX === 0 ? 0.2 : 0.15 }}
       className="max-w-2xl mx-auto pb-20"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
@@ -172,9 +165,13 @@ export function StudyCountry() {
         </div>
         <div className="bg-navy-light border border-navy-lighter rounded-2xl p-3 flex flex-col">
           <div className="text-xs uppercase tracking-wider text-slate-500 mb-1 text-center">Location</div>
-          <div className="flex-1 min-h-[220px] relative rounded-lg overflow-hidden">
+          {/* data-no-swipe: horizontal swipe here must pan the map, not switch country */}
+          <div
+            data-no-swipe="true"
+            className="flex-1 min-h-[220px] relative rounded-lg overflow-hidden"
+          >
             <WorldMap
-              interactive={false}
+              interactive
               highlightedCountries={[country.id]}
               selectedCountry={null}
               correctCountry={null}
@@ -182,69 +179,24 @@ export function StudyCountry() {
               onCountryClick={() => {}}
               zoomToCountry={country.id}
               showBorders
+              correctAsHighlight
               className="absolute inset-0"
             />
           </div>
         </div>
       </div>
 
-      {/* Mastery status */}
-      <div className="bg-navy-light border border-navy-lighter rounded-2xl p-4 mb-4">
-        <div className="text-white font-semibold text-sm mb-3">Mastery</div>
-        <div className="grid grid-cols-1 gap-2">
-          {DIMENSIONS.map(({ mode, label }) => {
-            const status = statusOf(progress.countryStats, country.id, mode);
-            const colour =
-              status === "mastered" ? "text-emerald"
-              : status === "learning" ? "text-gold"
-              : "text-slate-500";
-            const indicator =
-              status === "mastered" ? "bg-emerald"
-              : status === "learning" ? "bg-gold"
-              : "bg-navy-lighter";
-            const text =
-              status === "mastered" ? "Mastered ✓"
-              : status === "learning" ? "Learning"
-              : "Not started";
-            return (
-              <div key={mode} className="flex items-center gap-3 text-sm">
-                <span className={`w-2.5 h-2.5 rounded-full ${indicator}`} />
-                <span className="text-slate-300 w-20">{label}</span>
-                <span className={colour}>{text}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Quick actions */}
-      <div className="flex gap-2 mb-4">
-        <Link
-          to={`/flag-quiz?autostart=1`}
-          className="flex-1 px-3 py-2 rounded-xl bg-navy-light border border-navy-lighter hover:border-sky/50 text-slate-200 text-sm font-medium text-center transition-colors no-underline"
-          title="Start a short quiz (uses the Flag Quiz flow)"
-        >
-          🎯 Quiz me
-        </Link>
-        <button
-          onClick={handleMarkKnown}
-          className="flex-1 px-3 py-2 rounded-xl bg-emerald/15 border border-emerald/40 hover:bg-emerald/25 text-emerald text-sm font-medium transition-colors"
-        >
-          ✓ Mark as known
-        </button>
-      </div>
-
       {/* Prev / Next */}
       <div className="flex items-center justify-between gap-2">
         <button
-          onClick={() => prev && navigate(`/study/country/${prev.id}?region=${region}&sort=${sort}`)}
+          onClick={() => prev && goTo(prev, "right")}
           disabled={!prev}
           className="flex-1 px-3 py-2.5 rounded-xl bg-navy-light border border-navy-lighter hover:border-sky/50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-sm font-medium transition-colors text-left"
         >
           ← {prev ? prev.name : "—"}
         </button>
         <button
-          onClick={() => next && navigate(`/study/country/${next.id}?region=${region}&sort=${sort}`)}
+          onClick={() => next && goTo(next, "left")}
           disabled={!next}
           className="flex-1 px-3 py-2.5 rounded-xl bg-navy-light border border-navy-lighter hover:border-sky/50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-sm font-medium transition-colors text-right"
         >

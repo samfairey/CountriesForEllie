@@ -13,6 +13,7 @@ import { preloadGeoJson, isClickNearCountry } from "../utils/geoData";
 import { playCorrect, playWrong } from "../utils/sounds";
 import { hapticCorrect, hapticWrong } from "../utils/haptics";
 import { WorldMap } from "../components/map/WorldMap";
+import { CountryListPreview } from "../components/quiz/CountryListPreview";
 import type { Achievement } from "../data/achievements";
 
 const countries = countriesData as Country[];
@@ -311,6 +312,16 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
 
   const remainingPool = totalInRegion - masteredInRegion;
 
+  /** Countries still needing mastery in this region — shown in the
+   *  preview below Start Round so players can see what's coming. */
+  const remainingCountries = useMemo(() => {
+    const base = region === "All" ? countries : countries.filter((c) => c.region === region);
+    return base
+      .filter((c) => !mastered.has(c.id))
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [region, mastered]);
+
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
       <AnimatePresence mode="wait">
@@ -363,9 +374,9 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
                         <button
                           key={r}
                           onClick={() => setRegion(r)}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                             region === r
-                              ? "bg-violet-500 text-white shadow-lg shadow-violet-500/25"
+                              ? "bg-violet-500 text-white"
                               : "bg-navy-lighter text-slate-300 hover:bg-navy-lighter/80"
                           }`}
                         >
@@ -386,12 +397,18 @@ export function MasterMode({ onAchievements }: { onAchievements?: (a: Achievemen
                       </p>
                     </div>
                   ) : (
-                    <button
-                      onClick={handleStart}
-                      className="w-full py-3 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-xl transition-colors text-lg"
-                    >
-                      Start Round ({Math.min(COUNTRIES_PER_ROUND, remainingPool)} countries)
-                    </button>
+                    <>
+                      <button
+                        onClick={handleStart}
+                        className="w-full py-3 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-xl transition-colors text-lg"
+                      >
+                        Start Round ({Math.min(COUNTRIES_PER_ROUND, remainingPool)} countries)
+                      </button>
+                      <CountryListPreview
+                        countries={remainingCountries}
+                        headingLabel="Countries left to master"
+                      />
+                    </>
                   )}
                 </>
               )}

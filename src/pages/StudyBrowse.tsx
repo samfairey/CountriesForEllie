@@ -3,8 +3,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import countriesData from "../data/countries.json";
 import type { Country, Region } from "../types/country";
-import type { GameMode } from "../types/progress";
-import { useProgress } from "../hooks/useProgress";
 
 const countries = countriesData as Country[];
 
@@ -12,28 +10,7 @@ const REGIONS: (Region | "All")[] = ["All", "Africa", "Americas", "Asia", "Europ
 
 type SortOrder = "population" | "alphabetical";
 
-/** Five mastery dots — one per dimension. Reverse is treated as a separate
- *  dimension (mastered when you've seen the "name → flag/shape" variant enough
- *  — we approximate via master-mode stats, which uses reversed questions). */
-const MASTERY_DIMENSIONS: { mode: GameMode; label: string }[] = [
-  { mode: "flag-quiz",       label: "Flag" },
-  { mode: "capital-quiz",    label: "Capital" },
-  { mode: "pin-the-map",     label: "Location" },
-  { mode: "name-that-shape", label: "Shape" },
-  { mode: "master-mode",     label: "Reverse" },
-];
-
-function isMastered(
-  stats: Record<string, { timesSeen: number; timesCorrect: number }>,
-  countryId: string,
-  mode: GameMode,
-): boolean {
-  const s = stats[`${countryId}:${mode}`];
-  return !!s && s.timesSeen >= 3 && s.timesCorrect === s.timesSeen;
-}
-
 export function StudyBrowse() {
-  const { progress } = useProgress();
   const [region, setRegion] = useState<Region | "All">("All");
   const [sort, setSort] = useState<SortOrder>("population");
 
@@ -103,7 +80,7 @@ export function StudyBrowse() {
           {list.map((c) => (
             <Link
               key={c.id}
-              to={`/study/country/${c.id}`}
+              to={`/study/country/${c.id}?region=${region}&sort=${sort}`}
               className="flex items-center gap-3 px-4 py-3 border-b border-navy-lighter/30 last:border-b-0 hover:bg-navy-lighter/30 transition-colors no-underline"
             >
               <img
@@ -116,20 +93,7 @@ export function StudyBrowse() {
                 <div className="text-slate-100 text-sm font-medium truncate">{c.name}</div>
                 <div className="text-slate-500 text-xs truncate">{c.capital}</div>
               </div>
-              <div className="flex items-center gap-1 shrink-0" title="Mastery across dimensions">
-                {MASTERY_DIMENSIONS.map(({ mode, label }) => {
-                  const mastered = isMastered(progress.countryStats, c.id, mode);
-                  return (
-                    <span
-                      key={mode}
-                      title={`${label}: ${mastered ? "Mastered" : "Not mastered"}`}
-                      className={`w-2 h-2 rounded-full ${
-                        mastered ? "bg-emerald" : "bg-navy-lighter"
-                      }`}
-                    />
-                  );
-                })}
-              </div>
+              <span className="text-slate-600 text-sm shrink-0">›</span>
             </Link>
           ))}
         </div>

@@ -70,9 +70,9 @@ export function BlitzSetup({ onStart }: BlitzSetupProps) {
             <button
               key={r}
               onClick={() => setRegion(r)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 region === r
-                  ? "bg-sky text-white shadow-lg shadow-sky/25"
+                  ? "bg-sky text-white"
                   : "bg-navy-lighter text-slate-300 hover:bg-navy-lighter/80"
               }`}
             >

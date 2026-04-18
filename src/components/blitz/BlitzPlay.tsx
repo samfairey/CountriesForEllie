@@ -9,6 +9,17 @@ import { WorldMap } from "../map/WorldMap";
 import { playCorrect, playWrong, playStreak, playTick, playTimesUp } from "../../utils/sounds";
 import { hapticCorrect, hapticWrong, hapticStreak } from "../../utils/haptics";
 import { fuzzyMatch } from "../../utils/fuzzyMatch";
+import { useProgress } from "../../hooks/useProgress";
+import type { GameMode } from "../../types/progress";
+
+/** Map each blitz question type to the matching progress GameMode key
+ *  so SRS stats land in the right per-dimension bucket. */
+const BLITZ_MODE_FOR_TYPE: Record<BlitzQuestionType, GameMode> = {
+  flag: "flag-quiz",
+  capital: "capital-quiz",
+  pinMap: "pin-the-map",
+  nameShape: "name-that-shape",
+};
 
 interface BlitzPlayProps {
   generator: { next: () => BlitzQuestion };
@@ -33,6 +44,7 @@ export function BlitzPlay({
   geoData,
   onFinish,
 }: BlitzPlayProps) {
+  const { recordAnswer } = useProgress();
   const [question, setQuestion] = useState<BlitzQuestion>(() => generator.next());
   const [results, setResults] = useState<BlitzResult[]>([]);
   const [score, setScore] = useState(0);
@@ -177,8 +189,13 @@ export function BlitzPlay({
         pointsEarned: pts,
       };
       setResults((prev) => [...prev, result]);
+
+      // Record SRS stats against the per-dimension mode so Blitz answers
+      // count toward the mastery dots and study dashboard progress.
+      const srsMode = BLITZ_MODE_FOR_TYPE[question.type];
+      recordAnswer(question.countryId, srsMode, correct);
     },
-    [answered, timeLeft, question, streak, bestStreak, countryById, advanceQuestion]
+    [answered, timeLeft, question, streak, bestStreak, countryById, advanceQuestion, recordAnswer]
   );
 
   // Keyboard shortcuts for MC options

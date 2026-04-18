@@ -164,9 +164,9 @@ export function Home() {
             <button
               key={r}
               onClick={() => setRegion(r)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all shrink-0 ${
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors shrink-0 ${
                 region === r
-                  ? "bg-sky text-white shadow-lg shadow-sky/25"
+                  ? "bg-sky text-white"
                   : "bg-navy-lighter text-slate-300 hover:bg-navy-lighter/80"
               }`}
             >

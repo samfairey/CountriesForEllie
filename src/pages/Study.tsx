@@ -98,11 +98,9 @@ export function Study() {
     [progress.countryStats],
   );
 
-  // Start Review = shuffle the weakest/learning countries into a Flag quiz.
-  // Uses the existing autostart flow — no new backend needed.
-  const startReview = () => {
-    navigate(`/flag-quiz?autostart=1`);
-  };
+  const openBrowser = () => navigate("/study/browse");
+  // Secondary: keep the old quiz-style review accessible for users who want it.
+  const startReview = () => navigate("/flag-quiz?autostart=1");
 
   return (
     <motion.div
@@ -118,7 +116,7 @@ export function Study() {
         Review what you've learned and find your weak spots.
       </p>
 
-      {/* Today's review */}
+      {/* Primary CTA: Browse Countries */}
       <div className="bg-gradient-to-r from-sky/10 via-navy-light to-violet/10 border border-sky/30 rounded-2xl p-5 mb-6">
         <div className="text-slate-300 text-xs uppercase tracking-wider mb-1">
           Today's review
@@ -126,16 +124,23 @@ export function Study() {
         <div className="flex items-end gap-3 mb-4">
           <div className="text-4xl font-bold text-white">{buckets.dueToday}</div>
           <div className="text-slate-400 text-sm mb-1">
-            countries to review
+            countries could use review
           </div>
         </div>
         <button
-          onClick={startReview}
-          disabled={buckets.learning === 0}
-          className="w-full py-2.5 bg-sky hover:bg-sky-dark disabled:bg-navy-lighter disabled:text-slate-500 text-white font-semibold rounded-xl transition-colors"
+          onClick={openBrowser}
+          className="w-full py-2.5 bg-sky hover:bg-sky-dark text-white font-semibold rounded-xl transition-colors"
         >
-          {buckets.learning === 0 ? "Play a quiz first to unlock review" : "Start Review"}
+          Browse Countries
         </button>
+        {buckets.learning > 0 && (
+          <button
+            onClick={startReview}
+            className="w-full mt-2 py-2 bg-transparent border border-navy-lighter hover:border-sky/50 text-slate-300 hover:text-white text-sm font-medium rounded-xl transition-colors"
+          >
+            Review Due Cards ({buckets.dueToday})
+          </button>
+        )}
       </div>
 
       {/* Quick stats */}

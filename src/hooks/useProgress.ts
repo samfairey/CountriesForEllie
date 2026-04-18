@@ -92,10 +92,32 @@ export function useProgress() {
     [progress]
   );
 
+  /** Manually mark a country+mode as mastered. Writes a 3/3 stat block
+   *  so every mastery check (timesSeen >= 3 && timesCorrect === timesSeen)
+   *  immediately treats it as mastered, regardless of prior history. */
+  const markKnown = useCallback((countryId: string, mode: GameMode) => {
+    setProgress((prev) => {
+      const updated: ProgressData = {
+        ...prev,
+        countryStats: {
+          ...prev.countryStats,
+          [`${countryId}:${mode}`]: {
+            timesSeen: 3,
+            timesCorrect: 3,
+            lastSeen: todayString(),
+          },
+        },
+      };
+      saveProgress(updated);
+      return updated;
+    });
+  }, []);
+
   return {
     progress,
     recordAnswer,
     completeQuiz,
     getCountryStats,
+    markKnown,
   };
 }

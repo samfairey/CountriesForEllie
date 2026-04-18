@@ -7,6 +7,8 @@ import { CapitalQuiz } from "./pages/CapitalQuiz";
 import { Settings } from "./pages/Settings";
 import { Achievements } from "./pages/Achievements";
 import { Study } from "./pages/Study";
+import { StudyBrowse } from "./pages/StudyBrowse";
+import { StudyCountry } from "./pages/StudyCountry";
 import { KeyboardShortcuts } from "./components/common/KeyboardShortcuts";
 import { AchievementToast } from "./components/common/AchievementToast";
 import type { Achievement } from "./data/achievements";
@@ -76,6 +78,8 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/study" element={<Study />} />
+          <Route path="/study/browse" element={<StudyBrowse />} />
+          <Route path="/study/country/:id" element={<StudyCountry />} />
           <Route
             path="/pin-the-map"
             element={

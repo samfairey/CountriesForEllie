@@ -128,25 +128,33 @@ const HOVER_STYLE: PathOptions = {
   fillOpacity: 0.15,
 };
 
-/** Sub-component that handles zooming via map ref */
+/** Sub-component that handles zooming via map ref.
+ *
+ *  Uses React state (not a ref) for the geo data so the zoom effect
+ *  re-runs once the data arrives. Previously the first country visit
+ *  after page load wouldn't zoom — the effect fired with a still-null
+ *  ref and never re-triggered when loadGeoJson resolved.
+ */
 function ZoomController({ zoomToCountry }: { zoomToCountry?: string | null }) {
   const map = useMap();
-  const geoJsonRef = useRef<FeatureCollection | null>(null);
+  const [geoJson, setGeoJson] = useState<FeatureCollection | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     loadGeoJson().then((data) => {
-      geoJsonRef.current = data;
+      if (!cancelled) setGeoJson(data);
     });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
-    if (!zoomToCountry || !geoJsonRef.current) return;
-    const feature = getCountryFeature(geoJsonRef.current, zoomToCountry);
+    if (!zoomToCountry || !geoJson) return;
+    const feature = getCountryFeature(geoJson, zoomToCountry);
     if (!feature || !feature.geometry) return;
 
     const bounds = getLeafletBounds(feature.geometry);
     map.flyToBounds(bounds, { padding: [40, 40], maxZoom: 6, duration: 0.8 });
-  }, [zoomToCountry, map]);
+  }, [zoomToCountry, map, geoJson]);
 
   return null;
 }

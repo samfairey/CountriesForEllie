@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import type { FeatureCollection, Geometry } from "geojson";
 import countriesData from "../data/countries.json";
@@ -20,8 +19,6 @@ export function StudyCountry() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
-  // Tactile nudge: 0 by default; swipe sets to ±20 then navigates on frame-out
-  const [nudgeX, setNudgeX] = useState(0);
 
   // Preserve the sort order + region the browser used so prev/next match
   const region = (searchParams.get("region") as Region | "All" | null) ?? "All";
@@ -51,47 +48,34 @@ export function StudyCountry() {
     return getCountryFeature(geoData, country.id)?.geometry ?? null;
   }, [geoData, country]);
 
-  /** Navigate with a subtle nudge animation so the user sees their swipe registered. */
   const goTo = useCallback(
-    (target: Country, direction: "left" | "right") => {
-      setNudgeX(direction === "left" ? -20 : 20);
-      window.setTimeout(() => {
-        navigate(`/study/country/${target.id}?region=${region}&sort=${sort}`);
-      }, 150);
+    (target: Country) => {
+      navigate(`/study/country/${target.id}?region=${region}&sort=${sort}`);
     },
     [navigate, region, sort],
   );
 
-  // Swipe handling — but only on non-map areas. A data-no-swipe attribute
-  // on the map wrapper lets Leaflet handle its own pan/zoom gestures
-  // without us hijacking them to change country.
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest?.("[data-no-swipe]")) {
-      touchStartX.current = null;
-      return;
-    }
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  }, []);
-  const onTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    const dy = e.changedTouches[0].clientY - touchStartY.current;
-    touchStartX.current = null;
-    touchStartY.current = null;
-    // Require a mostly-horizontal swipe so vertical scrolling isn't captured
-    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
-    if (dx < 0 && next) goTo(next, "left");
-    else if (dx > 0 && prev) goTo(prev, "right");
-  }, [prev, next, goTo]);
+  /** Tap anywhere on the page (except the map or any explicit [data-no-tap]
+   *  element) to advance to the next country. */
+  const handlePageClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!next) return;
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.("[data-no-tap]")) return;
+      goTo(next);
+    },
+    [next, goTo],
+  );
 
+  // Keyboard arrows still work for keyboard users
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === "ArrowLeft" && prev) goTo(prev, "right");
-      else if (e.key === "ArrowRight" && next) goTo(next, "left");
+      if (e.key === "ArrowLeft" && prev) goTo(prev);
+      else if ((e.key === "ArrowRight" || e.key === " ") && next) {
+        e.preventDefault();
+        goTo(next);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -112,14 +96,11 @@ export function StudyCountry() {
   const hasOfficial = country.officialName && country.officialName !== country.name;
 
   return (
-    <motion.div
-      key={country.id}
-      initial={{ opacity: 0, x: 24 }}
-      animate={{ opacity: 1, x: nudgeX }}
-      transition={{ duration: nudgeX === 0 ? 0.2 : 0.15 }}
-      className="max-w-2xl mx-auto pb-20"
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
+    <div
+      className="max-w-2xl mx-auto pb-20 cursor-pointer"
+      onClick={handlePageClick}
+      role={next ? "button" : undefined}
+      aria-label={next ? `Tap to continue to ${next.name}` : undefined}
     >
       {/* Flag + name header */}
       <div className="flex flex-col items-center text-center mb-4">
@@ -165,10 +146,12 @@ export function StudyCountry() {
         </div>
         <div className="bg-navy-light border border-navy-lighter rounded-2xl p-3 flex flex-col">
           <div className="text-xs uppercase tracking-wider text-slate-500 mb-1 text-center">Location</div>
-          {/* data-no-swipe: horizontal swipe here must pan the map, not switch country */}
+          {/* data-no-tap: interacting with the map pans/zooms it — never
+              triggers tap-to-continue. The map auto-zooms to the country. */}
           <div
-            data-no-swipe="true"
+            data-no-tap="true"
             className="flex-1 min-h-[220px] relative rounded-lg overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
           >
             <WorldMap
               interactive
@@ -186,33 +169,28 @@ export function StudyCountry() {
         </div>
       </div>
 
-      {/* Prev / Next — disabled entirely at list edges, no "—" placeholder */}
-      <div className="flex items-center justify-between gap-2">
-        <button
-          onClick={() => prev && goTo(prev, "right")}
-          disabled={!prev}
-          aria-disabled={!prev}
-          className="flex-1 px-3 py-2.5 rounded-xl bg-navy-light border border-navy-lighter enabled:hover:border-sky/50 disabled:opacity-40 disabled:pointer-events-none text-slate-200 text-sm font-medium transition-colors text-left"
-        >
-          {prev ? `← ${prev.name}` : "← Previous"}
-        </button>
-        <button
-          onClick={() => next && goTo(next, "left")}
-          disabled={!next}
-          aria-disabled={!next}
-          className="flex-1 px-3 py-2.5 rounded-xl bg-navy-light border border-navy-lighter enabled:hover:border-sky/50 disabled:opacity-40 disabled:pointer-events-none text-slate-200 text-sm font-medium transition-colors text-right"
-        >
-          {next ? `${next.name} →` : "Next →"}
-        </button>
-      </div>
+      {/* Tap-to-continue hint */}
+      {next && (
+        <div className="text-center text-xs text-slate-500 mb-4 select-none">
+          Tap anywhere to continue to <span className="text-slate-400">{next.name}</span> →
+        </div>
+      )}
+      {!next && (
+        <div className="text-center text-xs text-slate-500 mb-4 select-none">
+          Last country in this list
+        </div>
+      )}
 
+      {/* Back to list — guarded so its click doesn't bubble to the page */}
       <Link
         to="/study/browse"
-        className="block text-center mt-6 text-slate-400 hover:text-white transition-colors text-sm no-underline"
+        data-no-tap="true"
+        onClick={(e) => e.stopPropagation()}
+        className="block text-center mt-2 text-slate-400 hover:text-white transition-colors text-sm no-underline"
       >
         &larr; Back to list
       </Link>
-    </motion.div>
+    </div>
   );
 }
 

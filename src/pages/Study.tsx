@@ -188,25 +188,6 @@ export function Study() {
         </div>
       </div>
 
-      {/* Quick-access to quiz modes */}
-      <div className="bg-navy-light border border-navy-lighter rounded-2xl p-4">
-        <div className="text-white font-semibold mb-3 text-sm">Practice a specific mode</div>
-        <div className="grid grid-cols-2 gap-2">
-          <Link to="/flag-quiz" className="no-underline px-3 py-2 rounded-lg bg-navy-lighter/50 hover:bg-navy-lighter text-slate-200 text-sm font-medium text-center transition-colors">
-            🏴 Flag Quiz
-          </Link>
-          <Link to="/capital-quiz" className="no-underline px-3 py-2 rounded-lg bg-navy-lighter/50 hover:bg-navy-lighter text-slate-200 text-sm font-medium text-center transition-colors">
-            🏛️ Capital Quiz
-          </Link>
-          <Link to="/pin-the-map" className="no-underline px-3 py-2 rounded-lg bg-navy-lighter/50 hover:bg-navy-lighter text-slate-200 text-sm font-medium text-center transition-colors">
-            📍 Pin the Map
-          </Link>
-          <Link to="/name-that-shape" className="no-underline px-3 py-2 rounded-lg bg-navy-lighter/50 hover:bg-navy-lighter text-slate-200 text-sm font-medium text-center transition-colors">
-            🗺️ Name that Shape
-          </Link>
-        </div>
-      </div>
-
       <Link
         to="/"
         className="block text-center mt-6 text-slate-400 hover:text-white transition-colors text-sm no-underline"
